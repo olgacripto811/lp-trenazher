@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LP-тренажёр</title>
+<style>
+:root{
+  --bg:#F8F9FA; --card:#FFFFFF; --text:#2D3748; --muted:#718096; --line:#E2E8F0; --soft:#F1F3F7;
+  --accent:#5A67D8; --accent-2:#434190; --accent-soft:#EBF0FF;
+  --pos:#2F855A; --neg:#97266D;
+  --in-bg:#C6F6D5; --in-tx:#22543D; --out-bg:#FEEBC8; --out-tx:#744210; --edge-bg:#E9D8FD; --edge-tx:#553C9A;
+  --demo-bg:#FBD38D; --band:#68D391; --bound:#38A169;
+  --radius:14px; --shadow:0 1px 2px rgba(45,55,72,.06),0 6px 20px rgba(45,55,72,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.demo-bar{background:var(--demo-bg);color:#5F370E;text-align:center;font-weight:600;font-size:13px;padding:6px 16px;letter-spacing:.02em}
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand b{display:block;font-size:17px}
+.brand small{display:block;color:var(--muted);font-size:12px;line-height:1.2}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#B794F4,#68D391);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px}
+.ticker{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.ticker b{color:var(--text)}
+.wallet-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--soft);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:14px}
+.wallet-btn .dot{width:8px;height:8px;border-radius:50%;background:var(--band)}
+.timebar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-top:14px;padding-bottom:4px}
+.tnow{display:flex;flex-direction:column;margin-right:auto}
+.tnow .lbl{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.tbtns{display:flex;gap:6px;flex-wrap:wrap}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;padding-top:10px;padding-bottom:2px;scrollbar-width:none}
+nav.tabs button{border:0;background:none;padding:8px 12px;border-radius:10px;cursor:pointer;color:var(--muted);font-weight:600;white-space:nowrap}
+nav.tabs button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+main{padding-top:16px;padding-bottom:32px}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:18px;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 8px}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.sm{font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:14px;transition:background .15s,border-color .15s}
+.btn:hover{border-color:#CBD5E0;background:var(--soft)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.block{width:100%;padding:11px}
+.q{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid #CBD5E0;background:var(--card);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;padding:0;line-height:1;vertical-align:middle}
+.q:hover{border-color:var(--accent);color:var(--accent)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.chip.in{background:var(--in-bg);color:var(--in-tx)}
+.chip.out{background:var(--out-bg);color:var(--out-tx)}
+.chip.edge{background:var(--edge-bg);color:var(--edge-tx)}
+.chip.closed{background:var(--soft);color:var(--muted)}
+.pair{display:flex;align-items:center;gap:8px;font-size:16px}
+.tk{display:inline-flex}
+.tk i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:9px;font-weight:800;color:#2D3748;border:2px solid #fff}
+.tk i+i{margin-left:-8px}
+.pcard{cursor:pointer;transition:transform .15s,border-color .15s}
+.pcard:hover{border-color:#CBD5E0;transform:translateY(-1px)}
+.kv3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.kv3 span,.tile span{display:block;font-size:12px;color:var(--muted)}
+.kv3 b{font-size:15px}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.tile{background:var(--soft);border-radius:12px;padding:10px 12px}
+.tile b{font-size:17px;display:block}
+.tile small{color:var(--muted);font-size:12px}
+.tile span{display:flex;align-items:center;gap:4px}
+.seg{display:inline-flex;background:var(--soft);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:5px 11px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.alert{border-radius:12px;padding:10px 14px;margin:10px 0;font-size:14px}
+.alert.warn{background:var(--out-bg);color:var(--out-tx)}
+.alert.info{background:var(--accent-soft);color:var(--accent-2)}
+.alert.ok{background:var(--in-bg);color:var(--in-tx)}
+.alert.safe{background:var(--edge-bg);color:var(--edge-tx)}
+.alert.err{background:#FED7E2;color:#702459}
+.alert b{font-weight:700}
+.alert ul{margin:4px 0 0;padding-left:18px}
+.pools{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.pool-opt{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--card)}
+.pool-opt:hover{border-color:#CBD5E0}
+.pool-opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.pool-opt small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.inp{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--card);font-size:15px}
+.inp:focus{outline:none;border-color:var(--accent)}
+.inp:disabled{background:var(--soft);color:var(--muted)}
+.inrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.amt{display:flex;gap:8px}
+.amt .inp{flex:1}
+.chart{width:100%;min-height:180px;margin:6px 0}
+.chart svg{display:block}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .axis{fill:var(--muted);font-size:11px}
+.chart .band{fill:var(--band);opacity:.22}
+.chart .bound{stroke:var(--bound);stroke-width:1.2;stroke-dasharray:4 4}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.chart .mark{stroke:#B794F4;stroke-width:1;stroke-dasharray:2 3}
+.chart .bl{fill:var(--bound);font-size:11px;font-weight:600}
+.comp{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--soft);margin:6px 0}
+.comp i{display:block;height:100%}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.t td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.r,table.t th.r{text-align:right}
+.tscroll{overflow-x:auto}
+.pnl-break{display:grid;grid-template-columns:1fr auto;gap:4px 16px;font-size:14px;max-width:420px}
+.pnl-break .sum{border-top:1px solid var(--line);padding-top:4px;font-weight:700}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.back{border:0;background:none;color:var(--accent);cursor:pointer;font-weight:600;padding:0;margin-bottom:10px}
+.overlay{position:fixed;inset:0;background:rgba(45,55,72,.35);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:50}
+.modal{background:var(--card);border-radius:18px;max-width:520px;width:100%;padding:20px;box-shadow:0 20px 60px rgba(45,55,72,.25)}
+.modal h2{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.x{border:0;background:var(--soft);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;flex:none}
+.txl{list-style:none;margin:10px 0;padding:0;counter-reset:tx}
+.txl li{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;counter-increment:tx}
+.txl li .h{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.txl li .h:before{content:counter(tx) ". ";color:var(--muted);margin-right:2px}
+.txl li .h span:first-child{flex:1}
+.txl .opt{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:13px}
+.txl .opt label{display:flex;gap:6px;align-items:flex-start;cursor:pointer}
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:60;max-width:min(380px,calc(100vw - 32px))}
+.toast{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:10px 36px 10px 14px;box-shadow:0 10px 30px rgba(45,55,72,.18);font-size:14px;position:relative}
+.toast .x{position:absolute;top:8px;right:8px;width:22px;height:22px;font-size:12px}
+.steps{margin:6px 0 0;padding-left:20px}
+.steps li{margin-bottom:4px}
+.learn h3{margin-top:14px}
+.learn ul{padding-left:20px;margin:4px 0 10px}
+footer{border-top:1px solid var(--line);padding:18px 0 28px;color:var(--muted);font-size:13px}
+.slider{width:100%;accent-color:var(--accent)}
+.empty{text-align:center;padding:30px 16px}
+@media (max-width:600px){
+  body{font-size:14px}
+  .kv3{grid-template-columns:1fr 1fr}
+  .inrow{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr 1fr}
+  .tile b{font-size:15px}
+  .modal{padding:16px}
+  .overlay{padding:16px}
+  .ticker{width:100%;order:3}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toasts"></div>
+
+<script>
+/*MODEL-START*/
+/* Модель тренажёра: чистые функции, без DOM. Математика Uniswap v3 + метрики в стиле аналитики LP-позиций. */
+var LPModel = (function () {
+  'use strict';
+  var HY = 8760;            // часов в году
+  var FULL = 1e14;          // «полный диапазон»: от P/1e14 до P*1e14
+  var RESERVE_USD = 40;     // сколько ETH (в $) советуем оставлять на газ
+  var TOKENS = {
+    ETH:  { dec: 4, native: true, color: '#B794F4' },
+    WBTC: { dec: 6, color: '#FBD38D' },
+    USDC: { dec: 2, color: '#90CDF4' },
+    USDT: { dec: 2, color: '#68D391' }
+  };
+  var POOLS = [
+    { id: 'eth-usdc-005', t0: 'ETH', t1: 'USDC', fee: 0.0005, vol: 180e6, tvl: 120e6, r: 0.20, pdec: 2, presets: [0.05, 0.15, 0.5] },
+    { id: 'eth-usdc-03',  t0: 'ETH', t1: 'USDC', fee: 0.003,  vol: 12e6,  tvl: 60e6,  r: 0.25, pdec: 2, presets: [0.05, 0.15, 0.5] },
+    { id: 'wbtc-eth-03',  t0: 'WBTC', t1: 'ETH', fee: 0.003,  vol: 8e6,   tvl: 40e6,  r: 0.15, pdec: 4, presets: [0.03, 0.1, 0.3] },
+    { id: 'usdc-usdt-001', t0: 'USDC', t1: 'USDT', fee: 0.0001, vol: 60e6, tvl: 50e6, r: 0.002, pdec: 5, presets: [0.0005, 0.001, 0.005] }
+  ];
+  var GAS = { approve: 1.5, swap: 3.5, mint: 7, increase: 5, decrease: 5, collect: 3, close: 7 };
+  var SPENDERS = { pm: 'менеджер позиций', router: 'роутер обменов' };
+
+  function pool(id) { for (var k = 0; k < POOLS.length; k++) if (POOLS[k].id === id) return POOLS[k]; throw new Error('Пул не найден'); }
+  function nowI(st) { return st.hist.ETH.length - 1; }
+  function usd(st, tok, i) {
+    if (i == null) i = nowI(st);
+    if (tok === 'ETH') return st.hist.ETH[i];
+    if (tok === 'WBTC') return st.hist.BTC[i];
+    if (tok === 'USDT') return st.hist.USDT[i];
+    return 1;
+  }
+  function price(st, p, i) { return usd(st, p.t0, i) / usd(st, p.t1, i); }
+  function fx(n) { return String(Number((+n).toPrecision(6))).replace('.', ','); }
+
+  // --- генератор случайных чисел (mulberry32), состояние хранится в st.rs ---
+  function rnd(st) {
+    var a = st.rs = (st.rs + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), a | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+  function gauss(st) { var u = 0; while (u === 0) u = rnd(st); var v = rnd(st); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+  // --- Uniswap v3: количество токенов в позиции с ликвидностью L ---
+  function amounts(L, P, pa, pb) {
+    var sp = Math.sqrt(P), sa = Math.sqrt(pa), sb = Math.sqrt(pb);
+    if (P <= pa) return { x: L * (1 / sa - 1 / sb), y: 0 };
+    if (P >= pb) return { x: 0, y: L * (sb - sa) };
+    return { x: L * (1 / sp - 1 / sb), y: L * (sp - sa) };
+  }
+  // стоимость (в token1) позиции с L = 1
+  function vpl(P, pa, pb) { var a = amounts(1, P, pa, pb); return a.x * P + a.y; }
+
+  // --- рынок ---
+  function stepMarket(st, sc) {
+    var dt = 1 / HY, vm = (sc && sc.volMult) || 1, dr = (sc && sc.drift) || 0;
+    var z1 = gauss(st), z2 = 0.8 * z1 + 0.6 * gauss(st);
+    var sE = 0.7 * vm, sB = 0.55 * vm;
+    var H = st.hist, n = H.ETH.length - 1;
+    var e = H.ETH[n] * Math.exp(dr - 0.5 * sE * sE * dt + sE * Math.sqrt(dt) * z1);
+    var b = H.BTC[n] * Math.exp(dr - 0.5 * sB * sB * dt + sB * Math.sqrt(dt) * z2);
+    var u = 1 + (H.USDT[n] - 1) * 0.85 + 0.00012 * gauss(st);
+    u = Math.min(1.003, Math.max(0.997, u));
+    H.ETH.push(+e.toPrecision(10)); H.BTC.push(+b.toPrecision(10)); H.USDT.push(+u.toFixed(7));
+    return Math.abs(z1);
+  }
+
+  function newState(seed, nowMs) {
+    var st = {
+      v: 1, rs: (seed | 0) || 12345, t0: 0, startI: 0,
+      hist: { ETH: [3200], BTC: [96000], USDT: [1] },
+      wallet: { ETH: 2, USDC: 10000, USDT: 0, WBTC: 0 },
+      approvals: {}, positions: [], nextId: 1, txs: [], poolL: {}, connected: false, introHidden: false
+    };
+    for (var k = 0; k < 720; k++) stepMarket(st, null); // 30 дней истории до старта
+    st.startI = nowI(st);
+    var hour = 3600e3, base = Math.floor(nowMs / hour) * hour;
+    st.t0 = base - st.startI * hour;
+    POOLS.forEach(function (p) {
+      var P = price(st, p), u1 = usd(st, p.t1);
+      st.poolL[p.id] = (p.tvl / u1) / vpl(P, P * (1 - p.r), P * (1 + p.r));
+    });
+    return st;
+  }
+
+  function status(st, pos, i) {
+    if (pos.closed) return 'closed';
+    if (pos.full) return 'in';
+    var P = price(st, pool(pos.pool), i);
+    if (P <= pos.pa || P >= pos.pb) return 'out';
+    var w = Math.log(pos.pb / pos.pa), d = Math.min(Math.log(P / pos.pa), Math.log(pos.pb / P));
+    return d < 0.12 * w ? 'edge' : 'in';
+  }
+
+  // --- машина времени: двигаем рынок по часам и начисляем комиссии ---
+  function advance(st, hours, sc) {
+    var open = st.positions.filter(function (p) { return !p.closed; });
+    var before = {}, after = {};
+    open.forEach(function (p) { before[p.id] = status(st, p); });
+    var feesUsd = 0, i0 = nowI(st);
+    for (var h = 0; h < hours; h++) {
+      var absz = stepMarket(st, sc), i = nowI(st), vols = {};
+      POOLS.forEach(function (p) {
+        vols[p.id] = p.vol / 24 * ((sc && sc.volume) || 1) * (0.6 + 0.4 * Math.min(3, absz)) * Math.exp(0.25 * gauss(st) - 0.03125);
+      });
+      open.forEach(function (pos) {
+        var p = pool(pos.pool), u0 = usd(st, p.t0, i), u1 = usd(st, p.t1, i), P = u0 / u1;
+        var a = amounts(pos.L, P, pos.pa, pos.pb), val = a.x * u0 + a.y * u1;
+        pos.int.usd += val; pos.int.t0 += val / u0; pos.int.t1 += val / u1; pos.int.h += 1;
+        if (pos.L > 0 && P > pos.pa && P < pos.pb) {
+          var share = pos.L / (pos.L + st.poolL[p.id]);
+          var fee = vols[p.id] * p.fee * share;
+          pos.f0 += fee / 2 / u0; pos.f1 += fee / 2 / u1; pos.inH += 1; feesUsd += fee;
+        }
+      });
+    }
+    open.forEach(function (p) { after[p.id] = status(st, p); });
+    return { hours: hours, i0: i0, i1: nowI(st), feesUsd: feesUsd, before: before, after: after, ids: open.map(function (p) { return p.id; }) };
+  }
+
+  // --- газ и разрешения ---
+  function gasMult(st) { var i = nowI(st); var s = Math.sin(i * 12.9898) * 43758.5453; return 0.75 + 0.5 * (s - Math.floor(s)); }
+  function gasCost(st, kind) { var u = GAS[kind] * gasMult(st); return { usd: u, eth: u / usd(st, 'ETH') }; }
+  function akey(spender, tok) { return spender + ':' + tok; }
+  function needApprove(st, spender, tok, amt) {
+    if (TOKENS[tok].native || !(amt > 0)) return false;
+    var a = st.approvals[akey(spender, tok)];
+    if (a === 'max') return false;
+    return !((a || 0) >= amt * (1 - 1e-12));
+  }
+  function useApproval(st, spender, tok, amt) {
+    var k = akey(spender, tok), a = st.approvals[k];
+    if (typeof a === 'number') { a = a - amt; if (a <= 1e-9) delete st.approvals[k]; else st.approvals[k] = a; }
+  }
+  function approveTx(spender, tok, amt) {
+    return { kind: 'approve', label: 'Разрешение (approve): ' + tok + ' для «' + SPENDERS[spender] + '»', approve: { spender: spender, tok: tok, amt: amt } };
+  }
+  function swapCost(a, b) { var st = { USDC: 1, USDT: 1 }; return (st[a] && st[b]) ? 0.0002 : 0.0035; }
+  function ethIn(p, x, y) { return (p.t0 === 'ETH' ? x : 0) + (p.t1 === 'ETH' ? y : 0); }
+  function need(st, tok, amt) {
+    if (st.wallet[tok] + 1e-9 < amt) throw new Error('Не хватает ' + tok + ': нужно ' + fx(amt) + ', в кошельке ' + fx(st.wallet[tok]) + '.');
+  }
+  function clampWallet(st) { Object.keys(st.wallet).forEach(function (t) { if (st.wallet[t] < 0 && st.wallet[t] > -1e-6) st.wallet[t] = 0; }); }
+
+  // --- позиции ---
+  function pushFlow(st, pos, type, a0, a1) {
+    var p = pool(pos.pool), i = nowI(st);
+    pos.flows.push({ type: type, i: i, a0: a0, a1: a1, p0: usd(st, p.t0, i), p1: usd(st, p.t1, i) });
+  }
+  function pushGas(st, pos, g) {
+    var p = pool(pos.pool), i = nowI(st);
+    pos.flows.push({ type: 'gas', i: i, usd: g.usd, eth: g.eth, p0: usd(st, p.t0, i), p1: usd(st, p.t1, i) });
+  }
+  function newPosition(st, p, pa, pb, L, full, from) {
+    var pos = { id: st.nextId++, pool: p.id, pa: pa, pb: pb, full: !!full, L: L, f0: 0, f1: 0, openI: nowI(st),
+      closed: false, closedI: null, from: from || null, to: null, flows: [], int: { usd: 0, t0: 0, t1: 0, h: 0 }, inH: 0 };
+    st.positions.push(pos);
+    return pos;
+  }
+  function getPos(st, id) { for (var k = 0; k < st.positions.length; k++) if (st.positions[k].id === id) return st.positions[k]; return null; }
+
+  function validRange(pa, pb) {
+    if (!(pa > 0) || !(pb > 0) || !isFinite(pa) || !isFinite(pb)) throw new Error('Укажи нижнюю и верхнюю границу цены числами больше нуля.');
+    if (!(pb > pa * 1.0001)) throw new Error('Нижняя граница должна быть меньше верхней.');
+  }
+
+  function quoteMint(st, poolId, pa, pb, valueUsd) {
+    var p = pool(poolId), P = price(st, p), u1 = usd(st, p.t1);
+    validRange(pa, pb);
+    if (!(valueUsd > 0)) throw new Error('Введи сумму больше нуля.');
+    if (valueUsd > 1e7) throw new Error('В демо можно внести не больше $10 000 000.');
+    var L = (valueUsd / u1) / vpl(P, pa, pb), a = amounts(L, P, pa, pb);
+    var inRange = P > pa && P < pb;
+    var share = L / (L + st.poolL[p.id]);
+    return { L: L, x: a.x, y: a.y, P: P, inRange: inRange, single: inRange ? null : (P <= pa ? 't0' : 't1'),
+      feeApr: inRange ? p.vol * p.fee * share * 365 / valueUsd : 0 };
+  }
+
+  function maxMintValue(st, poolId, pa, pb) {
+    var p = pool(poolId), q = quoteMint(st, poolId, pa, pb, 1000), res = Infinity;
+    [[p.t0, q.x], [p.t1, q.y]].forEach(function (e) {
+      if (e[1] > 1e-15) {
+        var bal = st.wallet[e[0]];
+        if (e[0] === 'ETH') bal -= RESERVE_USD / usd(st, 'ETH');
+        res = Math.min(res, Math.max(0, bal) / e[1] * 1000);
+      }
+    });
+    return isFinite(res) ? Math.floor(res * 0.999) : 0;
+  }
+
+  function planMint(st, poolId, pa, pb, valueUsd, full) {
+    var p = pool(poolId), q = quoteMint(st, poolId, pa, pb, valueUsd), txs = [];
+    if (needApprove(st, 'pm', p.t0, q.x)) txs.push(approveTx('pm', p.t0, q.x));
+    if (needApprove(st, 'pm', p.t1, q.y)) txs.push(approveTx('pm', p.t1, q.y));
+    txs.push({ kind: 'mint', label: 'Создать позицию ' + p.t0 + '/' + p.t1, detail: 'Внести ' + fx(q.x) + ' ' + p.t0 + ' и ' + fx(q.y) + ' ' + p.t1 });
+    return {
+      txs: txs, ethOut: ethIn(p, q.x, q.y), quote: q,
+      check: function (st) { need(st, p.t0, q.x); need(st, p.t1, q.y); },
+      run: function (st, gas) {
+        st.wallet[p.t0] -= q.x; st.wallet[p.t1] -= q.y;
+        useApproval(st, 'pm', p.t0, q.x); useApproval(st, 'pm', p.t1, q.y);
+        var pos = newPosition(st, p, pa, pb, q.L, full, null);
+        pushFlow(st, pos, 'deposit', q.x, q.y);
+        pushGas(st, pos, gas[gas.length - 1]);
+        return pos;
+      }
+    };
+  }
+
+  function quoteSwap(st, from, to, amount) {
+    if (from === to) throw new Error('Выбери два разных токена.');
+    if (!(amount > 0)) throw new Error('Введи сумму больше нуля.');
+    var c = swapCost(from, to);
+    return { out: amount * usd(st, from) * (1 - c) / usd(st, to), cost: c, costUsd: amount * usd(st, from) * c };
+  }
+  function planSwap(st, from, to, amount) {
+    var q = quoteSwap(st, from, to, amount), txs = [];
+    if (needApprove(st, 'router', from, amount)) txs.push(approveTx('router', from, amount));
+    txs.push({ kind: 'swap', label: 'Обмен ' + from + ' → ' + to, detail: 'Отдать ' + fx(amount) + ' ' + from + ', получить ≈ ' + fx(q.out) + ' ' + to });
+    return {
+      txs: txs, ethOut: from === 'ETH' ? amount : 0, quote: q,
+      check: function (st) { need(st, from, amount); },
+      run: function (st) { st.wallet[from] -= amount; st.wallet[to] += q.out; useApproval(st, 'router', from, amount); return q.out; }
+    };
+  }
+
+  function planIncrease(st, pos, valueUsd) {
+    if (pos.closed) throw new Error('Позиция закрыта.');
+    var p = pool(pos.pool), q = quoteMint(st, pos.pool, pos.pa, pos.pb, valueUsd), txs = [];
+    if (needApprove(st, 'pm', p.t0, q.x)) txs.push(approveTx('pm', p.t0, q.x));
+    if (needApprove(st, 'pm', p.t1, q.y)) txs.push(approveTx('pm', p.t1, q.y));
+    txs.push({ kind: 'increase', label: 'Добавить ликвидность в #' + pos.id, detail: 'Внести ' + fx(q.x) + ' ' + p.t0 + ' и ' + fx(q.y) + ' ' + p.t1 });
+    return {
+      txs: txs, ethOut: ethIn(p, q.x, q.y), quote: q,
+      check: function (st) { need(st, p.t0, q.x); need(st, p.t1, q.y); },
+      run: function (st, gas) {
+        st.wallet[p.t0] -= q.x; st.wallet[p.t1] -= q.y;
+        useApproval(st, 'pm', p.t0, q.x); useApproval(st, 'pm', p.t1, q.y);
+        pos.L += q.L; pushFlow(st, pos, 'deposit', q.x, q.y); pushGas(st, pos, gas[gas.length - 1]);
+        return pos;
+      }
+    };
+  }
+
+  function planDecrease(st, pos, frac) {
+    if (pos.closed) throw new Error('Позиция закрыта.');
+    if (!(frac > 0 && frac < 1)) throw new Error('Выбери долю от 1 до 99%. Чтобы вывести всё, закрой позицию.');
+    var p = pool(pos.pool), a = amounts(pos.L * frac, price(st, p), pos.pa, pos.pb);
+    return {
+      txs: [{ kind: 'decrease', label: 'Вывести ' + Math.round(frac * 100) + '% ликвидности из #' + pos.id, detail: 'Получить ' + fx(a.x) + ' ' + p.t0 + ' и ' + fx(a.y) + ' ' + p.t1 }],
+      ethOut: -ethIn(p, a.x, a.y), quote: a,
+      run: function (st, gas) {
+        pos.L *= (1 - frac); st.wallet[p.t0] += a.x; st.wallet[p.t1] += a.y;
+        pushFlow(st, pos, 'withdraw', a.x, a.y); pushGas(st, pos, gas[0]); return pos;
+      }
+    };
+  }
+
+  function planCollect(st, pos) {
+    var p = pool(pos.pool), v = pos.f0 * usd(st, p.t0) + pos.f1 * usd(st, p.t1);
+    if (v < 0.01) throw new Error('Пока нечего собирать: комиссии меньше $0,01. Перемотай время вперёд.');
+    var f0 = pos.f0, f1 = pos.f1;
+    return {
+      txs: [{ kind: 'collect', label: 'Собрать комиссии из #' + pos.id, detail: 'Получить ' + fx(f0) + ' ' + p.t0 + ' и ' + fx(f1) + ' ' + p.t1 }],
+      ethOut: -ethIn(p, f0, f1), feesUsd: v,
+      run: function (st, gas) {
+        st.wallet[p.t0] += f0; st.wallet[p.t1] += f1; pushFlow(st, pos, 'collect', f0, f1);
+        pos.f0 = 0; pos.f1 = 0; pushGas(st, pos, gas[0]); return pos;
+      }
+    };
+  }
+
+  function closeInto(st, pos) {
+    var p = pool(pos.pool), a = amounts(pos.L, price(st, p), pos.pa, pos.pb);
+    st.wallet[p.t0] += a.x + pos.f0; st.wallet[p.t1] += a.y + pos.f1;
+    if (a.x > 0 || a.y > 0) pushFlow(st, pos, 'withdraw', a.x, a.y);
+    if (pos.f0 > 0 || pos.f1 > 0) pushFlow(st, pos, 'collect', pos.f0, pos.f1);
+    pos.L = 0; pos.f0 = 0; pos.f1 = 0; pos.closed = true; pos.closedI = nowI(st);
+  }
+  function planClose(st, pos) {
+    if (pos.closed) throw new Error('Позиция уже закрыта.');
+    var p = pool(pos.pool), a = amounts(pos.L, price(st, p), pos.pa, pos.pb);
+    return {
+      txs: [{ kind: 'close', label: 'Закрыть #' + pos.id + ': вывести всё и собрать комиссии', detail: 'Получить ' + fx(a.x + pos.f0) + ' ' + p.t0 + ' и ' + fx(a.y + pos.f1) + ' ' + p.t1 }],
+      ethOut: -ethIn(p, a.x + pos.f0, a.y + pos.f1),
+      run: function (st, gas) { closeInto(st, pos); pushGas(st, pos, gas[0]); return pos; }
+    };
+  }
+
+  // сколько продать, чтобы получить нужное соотношение токенов для нового диапазона (с учётом стоимости обмена c)
+  function solveRebalance(a0, a1, P, x1, y1, c) {
+    var g = 1 - c;
+    if (x1 <= 0) return { sell: 't0', s: a0, L: (a1 + a0 * P * g) / y1 };
+    if (y1 <= 0) return { sell: 't1', s: a1, L: (a0 + a1 / P * g) / x1 };
+    var r = x1 / y1;
+    if (a0 > r * a1) { var s0 = (a0 - r * a1) / (1 + r * P * g); return { sell: 't0', s: s0, L: (a0 - s0) / x1 }; }
+    var s1 = (r * a1 - a0) / (r + g / P); return { sell: 't1', s: s1, L: (a1 - s1) / y1 };
+  }
+
+  function quoteRerange(st, pos, pa, pb) {
+    if (pos.closed) throw new Error('Позиция закрыта.');
+    validRange(pa, pb);
+    var p = pool(pos.pool), P = price(st, p), u0 = usd(st, p.t0), u1 = usd(st, p.t1);
+    var a = amounts(pos.L, P, pos.pa, pos.pb), one = amounts(1, P, pa, pb), c = swapCost(p.t0, p.t1);
+    var sol = solveRebalance(a.x, a.y, P, one.x, one.y, c);
+    var sell = sol.sell, s = sol.s, L2 = sol.L;
+    var swapUsd = sell === 't0' ? s * u0 : s * u1;
+    if (swapUsd < 1) {
+      s = 0; swapUsd = 0;
+      L2 = Math.min(one.x > 0 ? a.x / one.x : Infinity, one.y > 0 ? a.y / one.y : Infinity);
+    }
+    var got = s > 0 ? (sell === 't0' ? s * P * (1 - c) : s / P * (1 - c)) : 0;
+    var n = amounts(L2, P, pa, pb);
+    var after0 = a.x - (sell === 't0' ? s : 0) + (sell === 't1' ? got : 0);
+    var after1 = a.y - (sell === 't1' ? s : 0) + (sell === 't0' ? got : 0);
+    return { a: a, f0: pos.f0, f1: pos.f1, sell: sell, sellTok: sell === 't0' ? p.t0 : p.t1, buyTok: sell === 't0' ? p.t1 : p.t0,
+      s: s, got: got, swapUsd: swapUsd, swapLossUsd: swapUsd * c, L: L2, x: n.x, y: n.y,
+      dust0: Math.max(0, after0 - n.x), dust1: Math.max(0, after1 - n.y), P: P,
+      oldUsd: a.x * u0 + a.y * u1, newUsd: n.x * u0 + n.y * u1 };
+  }
+
+  function planRerange(st, pos, pa, pb, full) {
+    var p = pool(pos.pool), q = quoteRerange(st, pos, pa, pb), txs = [];
+    txs.push({ kind: 'close', label: 'Вывести всё из #' + pos.id + ' и собрать комиссии', detail: 'Получить ' + fx(q.a.x) + ' ' + p.t0 + ' и ' + fx(q.a.y) + ' ' + p.t1 + ' + комиссии' });
+    var appr = {}; // разрешения, которые выдаются в этом же плане
+    if (q.s > 0) {
+      if (needApprove(st, 'router', q.sellTok, q.s)) { txs.push(approveTx('router', q.sellTok, q.s)); }
+      txs.push({ kind: 'swap', label: 'Обмен ' + q.sellTok + ' → ' + q.buyTok, detail: 'Отдать ' + fx(q.s) + ' ' + q.sellTok + ', получить ≈ ' + fx(q.got) + ' ' + q.buyTok });
+    }
+    if (needApprove(st, 'pm', p.t0, q.x)) txs.push(approveTx('pm', p.t0, q.x));
+    if (needApprove(st, 'pm', p.t1, q.y)) txs.push(approveTx('pm', p.t1, q.y));
+    txs.push({ kind: 'mint', label: 'Создать новую позицию ' + p.t0 + '/' + p.t1, detail: 'Внести ' + fx(q.x) + ' ' + p.t0 + ' и ' + fx(q.y) + ' ' + p.t1 });
+    var ethBack = ethIn(p, q.a.x + q.f0, q.a.y + q.f1);
+    var ethSpend = ethIn(p, q.x, q.y) + (q.sellTok === 'ETH' ? q.s : 0) - (q.buyTok === 'ETH' ? q.got : 0);
+    return {
+      txs: txs, ethOut: ethSpend - ethBack, quote: q,
+      run: function (st, gas) {
+        closeInto(st, pos);
+        txs.forEach(function (t, k) { if (t.kind === 'close') pushGas(st, pos, gas[k]); });
+        if (q.s > 0) { st.wallet[q.sellTok] -= q.s; st.wallet[q.buyTok] += q.got; useApproval(st, 'router', q.sellTok, q.s); }
+        st.wallet[p.t0] -= q.x; st.wallet[p.t1] -= q.y;
+        useApproval(st, 'pm', p.t0, q.x); useApproval(st, 'pm', p.t1, q.y);
+        var np = newPosition(st, p, pa, pb, q.L, full, pos.id);
+        pos.to = np.id;
+        pushFlow(st, np, 'deposit', q.x, q.y);
+        txs.forEach(function (t, k) { if (t.kind === 'swap' || t.kind === 'mint') pushGas(st, np, gas[k]); });
+        return np;
+      }
+    };
+  }
+
+  function planRevoke(st, key) {
+    var parts = key.split(':');
+    return {
+      txs: [{ kind: 'approve', label: 'Отозвать разрешение: ' + parts[1] + ' для «' + SPENDERS[parts[0]] + '»', detail: 'Разрешение станет равным нулю' }],
+      ethOut: 0,
+      run: function (st) { delete st.approvals[key]; }
+    };
+  }
+
+  function planGas(st, plan) {
+    var list = plan.txs.map(function (t) { return gasCost(st, t.kind); });
+    var u = 0, e = 0; list.forEach(function (g) { u += g.usd; e += g.eth; });
+    return { list: list, usd: u, eth: e };
+  }
+
+  function executePlan(st, plan, opts) {
+    opts = opts || {}; var max = opts.max || {};
+    var g = planGas(st, plan), needEth = g.eth + Math.max(0, plan.ethOut || 0);
+    if (st.wallet.ETH + 1e-12 < needEth) {
+      throw new Error('Не хватает ETH. Нужно ≈ ' + fx(needEth) + ' ETH (из них газ ≈ ' + fx(g.eth) + ' ETH), а в кошельке ' + fx(st.wallet.ETH) + ' ETH. Газ всегда платится в ETH, поэтому оставляй небольшой запас.');
+    }
+    if (plan.check) plan.check(st);
+    st.wallet.ETH -= g.eth;
+    var i = nowI(st);
+    plan.txs.forEach(function (t, k) {
+      if (t.approve) st.approvals[akey(t.approve.spender, t.approve.tok)] = max[k] ? 'max' : t.approve.amt;
+      st.txs.unshift({ i: i, label: t.label, kind: t.kind, gasUsd: g.list[k].usd, gasEth: g.list[k].eth, max: !!(t.approve && max[k]) });
+    });
+    var res = plan.run(st, g.list);
+    clampWallet(st);
+    return res;
+  }
+
+  // --- метрики позиции ---
+  // bench: 'hold' — сравнение с «просто держать токены»; 'usd' — с долларом; 't0'/'t1' — с одним из токенов
+  function metrics(st, pos, bench) {
+    var p = pool(pos.pool), i = pos.closed ? pos.closedI : nowI(st);
+    var u0 = usd(st, p.t0, i), u1 = usd(st, p.t1, i), ue = usd(st, 'ETH', i), P = u0 / u1;
+    var a = amounts(pos.L, P, pos.pa, pos.pb);
+    function V(a0, a1, p0, p1) {
+      if (bench === 'hold') return a0 * u0 + a1 * u1;
+      var vu = a0 * p0 + a1 * p1;
+      if (bench === 'usd') return vu;
+      if (bench === 't0') return vu / p0;
+      return vu / p1;
+    }
+    var pooled = V(a.x, a.y, u0, u1), unc = V(pos.f0, pos.f1, u0, u1);
+    var dep = 0, wd = 0, col = 0, gas = 0, colUsd = 0, gasUsd = 0, depUsd = 0, wdUsd = 0;
+    pos.flows.forEach(function (f) {
+      if (f.type === 'gas') {
+        gasUsd += f.usd;
+        gas += bench === 'hold' ? f.eth * ue : bench === 'usd' ? f.usd : bench === 't0' ? f.usd / f.p0 : f.usd / f.p1;
+        return;
+      }
+      var v = V(f.a0, f.a1, f.p0, f.p1), vu = f.a0 * f.p0 + f.a1 * f.p1;
+      if (f.type === 'deposit') depUsd += vu; else if (f.type === 'withdraw') wdUsd += vu;
+      if (f.type === 'deposit') dep += v;
+      else if (f.type === 'withdraw') wd += v;
+      else if (f.type === 'collect') { col += v; colUsd += f.a0 * f.p0 + f.a1 * f.p1; }
+    });
+    var div = pooled + wd - dep, fees = unc + col, poolPnl = div + fees, total = poolPnl - gas;
+    var h = pos.int.h, capSum = bench === 't0' ? pos.int.t0 : bench === 't1' ? pos.int.t1 : pos.int.usd;
+    var cap = h > 0 ? capSum / h : 0, ok = h >= 24 && cap > 0;
+    var uncUsd = pos.f0 * u0 + pos.f1 * u1;
+    return {
+      bench: bench, unit: bench === 't0' ? p.t0 : bench === 't1' ? p.t1 : 'USD',
+      x: a.x, y: a.y, P: P, pooled: pooled, pooledUsd: a.x * u0 + a.y * u1, unc: unc, uncUsd: uncUsd,
+      dep: dep, wd: wd, depUsd: depUsd, wdUsd: wdUsd, col: col, gas: gas, gasUsd: gasUsd, div: div, fees: fees, poolPnl: poolPnl, total: total,
+      apr: ok ? total / cap * HY / h : null, feeApr: ok ? fees / cap * HY / h : null,
+      roi: (dep + gas) > 0 ? total / (dep + gas) : null,
+      feesUsdAll: uncUsd + colUsd, avgDailyFeesUsd: h >= 1 ? (uncUsd + colUsd) / (h / 24) : null,
+      ageH: h, inH: pos.inH, status: status(st, pos, i)
+    };
+  }
+
+  return {
+    HY: HY, FULL: FULL, RESERVE_USD: RESERVE_USD, TOKENS: TOKENS, POOLS: POOLS, GAS: GAS, SPENDERS: SPENDERS,
+    pool: pool, nowI: nowI, usd: usd, price: price, amounts: amounts, vpl: vpl, newState: newState, status: status,
+    advance: advance, gasCost: gasCost, needApprove: needApprove, getPos: getPos, quoteMint: quoteMint, maxMintValue: maxMintValue,
+    planMint: planMint, quoteSwap: quoteSwap, planSwap: planSwap, planIncrease: planIncrease, planDecrease: planDecrease,
+    planCollect: planCollect, planClose: planClose, solveRebalance: solveRebalance, quoteRerange: quoteRerange,
+    planRerange: planRerange, planRevoke: planRevoke, planGas: planGas, executePlan: executePlan, metrics: metrics, swapCost: swapCost
+  };
+})();
+/*MODEL-END*/
+</script>
+
+<script>
+(function () {
+'use strict';
+var M = LPModel, KEY = 'lp-trenazher-v1';
+
+// ---------- состояние ----------
+function load() { try { var s = localStorage.getItem(KEY); if (!s) return null; var o = JSON.parse(s); return (o && o.v === 1 && o.hist) ? o : null; } catch (e) { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+function fresh() { return M.newState((Date.now() % 2147483647) | 0, Date.now()); }
+var st = load() || fresh();
+
+var ui = {
+  tab: 'positions', posId: null, bench: 'hold', days: 30, showClosed: false,
+  form: { pool: 'eth-usdc-005', preset: 1, paStr: '', pbStr: '', amount: '1000' },
+  swap: { from: 'USDC', to: 'ETH', amount: '' },
+  modal: null, toasts: [], tid: 0
+};
+var charts = {};
+
+// ---------- форматирование ----------
+var NF = {};
+function nf(d) { return NF[d] || (NF[d] = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: d, maximumFractionDigits: d })); }
+function num(n, d) { return isFinite(n) ? nf(d).format(n) : '—'; }
+function money(n) { if (n == null || !isFinite(n)) return '—'; var a = Math.abs(n); return (n < 0 ? '−' : '') + '$' + num(a, a >= 1 || a === 0 ? 2 : 4); }
+function smoney(n) { if (n == null || !isFinite(n)) return '—'; return (n > 0 ? '+' : '') + money(n); }
+function tokF(n, t) { var d = M.TOKENS[t].dec, a = Math.abs(n); if (a > 0 && a < Math.pow(10, -d)) d += 3; return (n < 0 ? '−' : '') + num(a, d) + ' ' + t; }
+function stok(n, t) { return (n > 0 ? '+' : '') + tokF(n, t); }
+function pct(x, signed) { if (x == null || !isFinite(x)) return '—'; var s = signed ? (x > 0 ? '+' : x < 0 ? '−' : '') : (x < 0 ? '−' : ''); return s + num(Math.abs(x * 100), Math.abs(x) < 0.001 && x !== 0 ? 3 : 2) + '%'; }
+function cls(n) { return n > 1e-9 ? 'pos' : n < -1e-9 ? 'neg' : ''; }
+function priceF(P, p) { return num(P, p.pdec); }
+function feeF(p) { return num(p.fee * 100, p.fee < 0.001 ? 2 : 1) + '%'; }
+function shortUsd(n) { return n >= 1e9 ? '$' + num(n / 1e9, 1) + ' млрд' : n >= 1e6 ? '$' + num(n / 1e6, 0) + ' млн' : money(n); }
+function pairF(p) { return p.t0 + '/' + p.t1; }
+function presetF(p, r) { return '±' + num(r * 100, r < 0.01 ? (r < 0.001 ? 2 : 1) : 0) + '%'; }
+var MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+var MS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+function dateF(i, short) {
+  var d = new Date(st.t0 + i * 3600e3);
+  if (short) return d.getDate() + ' ' + MS[d.getMonth()];
+  return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear() + ', ' + String(d.getHours()).padStart(2, '0') + ':00';
+}
+function ageF(h) { if (h < 24) return h + ' ч'; var d = Math.floor(h / 24); return d + ' дн' + (h % 24 ? ' ' + (h % 24) + ' ч' : ''); }
+function benchVal(n, m) { return m.unit === 'USD' ? money(n) : tokF(n, m.unit); }
+function sbenchVal(n, m) { return m.unit === 'USD' ? smoney(n) : stok(n, m.unit); }
+function parseNum(s) { if (s == null) return NaN; s = String(s).replace(/[\s ]/g, '').replace(',', '.'); if (s === '') return NaN; return Number(s); }
+function inputPrice(P, p) { return P.toFixed(p.pdec); }
+function walletUsd() { return Object.keys(st.wallet).reduce(function (s, t) { return s + st.wallet[t] * M.usd(st, t); }, 0); }
+function tk(t) { return '<i style="background:' + M.TOKENS[t].color + '">' + t.slice(0, t === 'WBTC' ? 4 : 3) + '</i>'; }
+function pairBadge(p) { return '<span class="tk">' + tk(p.t0) + tk(p.t1) + '</span>'; }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+var STATUS = { in: 'В диапазоне', edge: 'У границы', out: 'Вне диапазона', closed: 'Закрыта' };
+function chip(s) { return '<span class="chip ' + s + '">' + STATUS[s] + '</span>'; }
+function rangeF(pos, p) {
+  if (pos.full) return 'Полный диапазон (0 → ∞)';
+  return priceF(pos.pa, p) + ' – ' + priceF(pos.pb, p) + ' ' + p.t1 + ' за 1 ' + p.t0;
+}
+function q(k) { return '<button class="q" data-act="tip" data-k="' + k + '" aria-label="Подсказка">?</button>'; }
+
+// ---------- подсказки простым языком ----------
+var TIPS = {
+  time: ['Машина времени', 'Время в тренажёре идёт только по твоим кнопкам. «+1 день» = рынок прожил 24 часа: цены поменялись, трейдеры наторговали, комиссии начислились. Сценарии показывают резкие движения, которые в жизни случаются внезапно.'],
+  pooled: ['Стоимость позиции (Pooled assets)', 'Сколько сейчас стоят токены внутри позиции, без комиссий. Состав всё время меняется: когда цена растёт, пул продаёт растущий токен за второй, а когда падает — докупает падающий.'],
+  unc: ['Несобранные комиссии', 'Комиссии, которые уже заработаны, но лежат в позиции. Чтобы они попали в кошелёк, нужна отдельная транзакция «Собрать комиссии» (это стоит газа).'],
+  total: ['Total PnL — итоговый результат', 'Divergence + комиссии − газ. Главная цифра: насколько ты в плюсе или в минусе по сравнению с выбранным бенчмарком (по умолчанию — с тем, чтобы просто держать те же токены).'],
+  poolPnl: ['Pool PnL', 'Результат без учёта газа: divergence + комиссии. Разница между Pool PnL и Total PnL — это сколько «съел» газ.'],
+  div: ['Divergence loss (импермантная потеря)', 'Насколько позиция отстала от бенчмарка из-за движения цены. При бенчмарке HOLD это классическая «импермантная потеря»: разница с тем, как если бы токены просто лежали в кошельке. Комиссии должны её перекрывать — иначе позиция работает в минус.'],
+  fees: ['Комиссии всего', 'Все заработанные комиссии: собранные и несобранные. Трейдеры платят их за обмен в пуле. Начисляются только пока цена внутри твоего диапазона.'],
+  gas: ['Газ', 'Плата сети за каждую транзакцию: создать, добавить, вывести, собрать. Газ платится в ETH, поэтому в кошельке всегда нужен небольшой запас ETH. Частые действия с маленькой позицией могут съесть весь доход.'],
+  apr: ['Total APR', 'Итоговый PnL в пересчёте на год относительно среднего вложенного капитала. На коротком сроке сильно скачет, поэтому тренажёр показывает его только через сутки. Это не обещание дохода, а «если бы так продолжалось весь год».'],
+  feeApr: ['Fee APR', 'Только комиссии в пересчёте на год. Высокий Fee APR ещё не значит прибыль: смотри на Total APR, где учтены divergence loss и газ.'],
+  roi: ['ROI', 'Total PnL / (внесено + газ). Простой процент результата за всё время, без пересчёта на год.'],
+  daily: ['Средние комиссии в день', 'Сколько в среднем комиссий приносит позиция за сутки.'],
+  age: ['Возраст позиции', 'Сколько времени прошло с создания. В скобках — сколько из этого времени цена была внутри диапазона (только тогда начисляются комиссии).'],
+  bench: ['Бенчмарк — с чем сравниваем', 'HOLD — с «просто держать те же токены, что внесла». USD — с «держать доллары». Токен — с «держать всё в этом токене». Цифры PnL, APR и ROI пересчитываются под выбранный бенчмарк. Новичкам удобнее всего HOLD.'],
+  range: ['Диапазон цен', 'Твоя ликвидность работает только внутри диапазона. Узкий диапазон = больше комиссий, но цена быстрее выйдет за границы. Выше верхней границы позиция целиком превращается во второй токен, ниже нижней — в первый.'],
+  fee: ['Уровень комиссии пула (fee tier)', 'Сколько платит трейдер за обмен: 0,01% — для стейблкоинов, 0,05% — для популярных пар, 0,3% — для более волатильных. У одной пары бывает несколько пулов с разными комиссиями.'],
+  approve: ['Разрешение (approve)', 'Прежде чем контракт сможет взять твои токены, ты даёшь ему разрешение. «Точная сумма» — безопаснее: контракт сможет взять только нужное. «Без лимита» — удобнее, но если контракт взломают или сайт окажется фишинговым, он сможет забрать все эти токены. Старые разрешения можно отозвать во вкладке «Кошелёк».']
+};
+
+// ---------- общий каркас ----------
+function render() {
+  var app = document.getElementById('app');
+  charts = {};
+  app.innerHTML = header() + nav() + '<main class="wrap">' + view() + '</main>' + footer();
+  document.getElementById('modal-root').innerHTML = ui.modal ? modalHtml() : '';
+  drawCharts();
+  renderToasts();
+}
+
+function chg(v, v0) { var c = v / v0 - 1; return '<span class="' + cls(c) + '">' + pct(c, true) + '</span>'; }
+function header() {
+  var n = M.nowI(st), e = M.usd(st, 'ETH'), b = M.usd(st, 'WBTC'), e0 = M.usd(st, 'ETH', st.startI), b0 = M.usd(st, 'WBTC', st.startI);
+  return '<div class="demo-bar">ДЕМО-РЕЖИМ · реальные деньги и кошельки не используются</div>' +
+    '<header class="top"><div class="wrap top-in">' +
+      '<div class="brand"><span class="logo">LP</span><span><b>LP-тренажёр</b><small>учебный симулятор ликвидности</small></span></div>' +
+      '<div class="ticker"><span>ETH <b>' + money(e) + '</b> ' + chg(e, e0) + '</span><span>BTC <b>' + money(b) + '</b> ' + chg(b, b0) + '</span><span class="sm">с начала тренировки</span></div>' +
+      (st.connected
+        ? '<button class="wallet-btn" data-act="tab" data-tab="wallet"><span class="dot"></span>Демо-кошелёк · ' + money(walletUsd()) + '</button>'
+        : '<button class="btn primary" data-act="connect">Подключить демо-кошелёк</button>') +
+    '</div></header>' +
+    '<section class="wrap timebar">' +
+      '<div class="tnow"><span class="lbl">Демо-время ' + q('time') + '</span><b>' + dateF(n) + '</b></div>' +
+      '<div class="tbtns">' +
+        '<button class="btn sm" data-act="adv" data-h="1">+1 час</button>' +
+        '<button class="btn sm" data-act="adv" data-h="24">+1 день</button>' +
+        '<button class="btn sm" data-act="adv" data-h="168">+1 неделя</button>' +
+        '<button class="btn sm" data-act="adv" data-h="720">+1 месяц</button>' +
+      '</div>' +
+      '<div class="tbtns">' +
+        '<button class="btn sm ghost" data-act="sc" data-k="crash">Сценарий: обвал −30%</button>' +
+        '<button class="btn sm ghost" data-act="sc" data-k="pump">Рост +30%</button>' +
+        '<button class="btn sm ghost" data-act="sc" data-k="flat">Боковик (неделя)</button>' +
+      '</div>' +
+    '</section>';
+}
+
+function nav() {
+  var tabs = [['positions', 'Мои позиции'], ['new', 'Новая позиция'], ['wallet', 'Кошелёк'], ['history', 'История'], ['learn', 'Как это работает']];
+  var cur = ui.tab === 'pos' ? 'positions' : ui.tab;
+  return '<div class="wrap"><nav class="tabs">' + tabs.map(function (t) {
+    return '<button class="' + (cur === t[0] ? 'on' : '') + '" data-act="tab" data-tab="' + t[0] + '">' + t[1] + '</button>';
+  }).join('') + '</nav></div>';
+}
+
+function footer() {
+  return '<footer><div class="wrap">' +
+    '<p><b>LP-тренажёр — учебный симулятор, а не финансовый совет.</b> Пулы, цены, объёмы торгов и газ смоделированы. В реальных протоколах цифры и результаты будут другими. ' +
+    'Тренажёр ничего не отправляет в интернет, не подключается к настоящим кошелькам и никогда не попросит seed-фразу или приватный ключ.</p>' +
+    '<button class="btn sm" data-act="reset">Сбросить демо и начать заново</button>' +
+    '</div></footer>';
+}
+
+function view() {
+  if (ui.tab === 'pos') { var pos = M.getPos(st, ui.posId); if (pos) return viewPosition(pos); ui.tab = 'positions'; }
+  if (ui.tab === 'new') return viewNew();
+  if (ui.tab === 'wallet') return viewWallet();
+  if (ui.tab === 'history') return viewHistory();
+  if (ui.tab === 'learn') return viewLearn();
+  return viewPositions();
+}
+
+// ---------- «Мои позиции» ----------
+function intro() {
+  if (st.introHidden) return '';
+  return '<div class="card"><div class="row between"><h2 style="margin:0">С чего начать</h2><button class="btn sm ghost" data-act="intro-hide">Скрыть</button></div>' +
+    '<ol class="steps">' +
+      '<li>Подключи демо-кошелёк. В нём 10 000 демо-USDC и 2 демо-ETH. Это игровые деньги, потерять их не страшно.</li>' +
+      '<li>Открой «Новая позиция» и внеси ликвидность в пул ETH/USDC.</li>' +
+      '<li>Перематывай время кнопками сверху и смотри, как меняются стоимость, комиссии и PnL.</li>' +
+      '<li>Нажми «Сценарий: обвал −30%». Так выглядит выход цены из диапазона. Попробуй сменить диапазон или закрыть позицию.</li>' +
+    '</ol>' +
+    '<div class="alert safe">Главное правило DeFi: <b>никто и никогда не должен просить твою seed-фразу</b> — ни сайт, ни кошелёк, ни «поддержка». Если просят — это мошенники.</div>' +
+    '</div>';
+}
+
+function viewPositions() {
+  var all = st.positions.slice().reverse();
+  var open = all.filter(function (p) { return !p.closed; });
+  var list = ui.showClosed ? all : open;
+  var h = intro() + '<div class="row between" style="margin-bottom:10px"><h1>Мои позиции</h1><div class="row">' +
+    (all.length > open.length ? '<button class="btn sm ghost" data-act="show-closed">' + (ui.showClosed ? 'Скрыть закрытые' : 'Показать закрытые (' + (all.length - open.length) + ')') + '</button>' : '') +
+    '<button class="btn primary sm" data-act="tab" data-tab="new">+ Новая позиция</button></div></div>';
+  if (!list.length) {
+    return h + '<div class="card empty"><h2>Пока нет открытых позиций</h2><p class="muted">Создай первую позицию — это безопасно, деньги игровые.</p><button class="btn primary" data-act="tab" data-tab="new">Создать позицию</button></div>';
+  }
+  return h + '<div class="grid2">' + list.map(posCard).join('') + '</div>';
+}
+
+function posCard(pos) {
+  var p = M.pool(pos.pool), m = M.metrics(st, pos, 'hold');
+  return '<div class="card pcard" data-act="open" data-id="' + pos.id + '">' +
+    '<div class="row between"><div class="pair">' + pairBadge(p) + '<b>' + pairF(p) + '</b><span class="chip">' + feeF(p) + '</span></div>' + chip(m.status) + '</div>' +
+    '<div class="muted sm" style="margin-top:6px">#' + pos.id + ' · ' + rangeF(pos, p) + '</div>' +
+    '<div class="kv3">' +
+      '<div><span>Стоимость</span><b>' + money(m.pooledUsd) + '</b></div>' +
+      '<div><span>Комиссии</span><b>' + money(pos.closed ? m.feesUsdAll : m.uncUsd) + '</b></div>' +
+      '<div><span>' + (pos.closed ? 'Итог PnL' : 'PnL vs HOLD') + '</span><b class="' + cls(m.total) + '">' + smoney(m.total) + '</b></div>' +
+    '</div></div>';
+}
+
+// ---------- страница позиции ----------
+function viewPosition(pos) {
+  var p = M.pool(pos.pool), m = M.metrics(st, pos, ui.bench);
+  var u0 = M.usd(st, p.t0, pos.closed ? pos.closedI : null), u1 = M.usd(st, p.t1, pos.closed ? pos.closedI : null);
+  var v0 = m.x * u0, v1 = m.y * u1, tot = v0 + v1, sh0 = tot > 0 ? v0 / tot : 0;
+  charts.pos = { pool: p, days: ui.days, pa: pos.pa, pb: pos.pb, full: pos.full, markI: pos.openI, endI: pos.closed ? pos.closedI : null };
+  var benches = [['hold', 'HOLD'], ['usd', 'USD'], ['t0', p.t0], ['t1', p.t1]];
+  var h = '<button class="back" data-act="tab" data-tab="positions">← Все позиции</button>';
+  h += '<div class="card"><div class="row between"><div class="pair">' + pairBadge(p) + '<h1 style="margin:0">' + pairF(p) + '</h1><span class="chip">' + feeF(p) + '</span><span class="muted">#' + pos.id + '</span></div>' + chip(m.status) + '</div>';
+  h += '<p class="muted sm" style="margin-top:6px">Диапазон ' + q('range') + ' ' + rangeF(pos, p) + ' · Текущая цена: 1 ' + p.t0 + ' = ' + priceF(M.price(st, p), p) + ' ' + p.t1 +
+    (pos.from ? ' · перенесена из #' + pos.from : '') + (pos.to ? ' · продолжение: <a href="#" data-act="open" data-id="' + pos.to + '">#' + pos.to + '</a>' : '') + '</p>';
+
+  if (m.status === 'out') {
+    var allIn = m.x > 0 ? p.t0 : p.t1;
+    h += '<div class="alert warn"><b>Цена вышла за диапазон.</b> Сейчас позиция целиком в ' + allIn + ', комиссии не начисляются. Варианты: подождать, пока цена вернётся; сменить диапазон (это стоит газа и фиксирует divergence loss); закрыть позицию.</div>';
+  } else if (m.status === 'edge') {
+    h += '<div class="alert safe">Цена подошла к границе диапазона. Если она выйдет за неё, комиссии перестанут начисляться.</div>';
+  } else if (pos.closed) {
+    h += '<div class="alert info">Позиция закрыта ' + dateF(pos.closedI) + '. Итоги зафиксированы на момент закрытия.</div>';
+  }
+
+  h += '<div class="row between" style="margin-top:8px"><div class="seg">' + [[7, '7 дн'], [30, '30 дн'], [90, '90 дн'], [100000, 'Всё']].map(function (d) {
+    return '<button class="' + (ui.days === d[0] ? 'on' : '') + '" data-act="days" data-v="' + d[0] + '">' + d[1] + '</button>'; }).join('') + '</div>' +
+    '<span class="sm muted">зелёная полоса — твой диапазон</span></div>';
+  h += '<div class="chart" data-chart="pos"></div>';
+
+  if (!pos.closed) {
+    h += '<div class="actions">' +
+      '<button class="btn" data-act="add" data-id="' + pos.id + '">Добавить ликвидность</button>' +
+      '<button class="btn" data-act="wd" data-id="' + pos.id + '">Вывести часть</button>' +
+      '<button class="btn" data-act="collect" data-id="' + pos.id + '">Собрать комиссии</button>' +
+      '<button class="btn" data-act="rerange" data-id="' + pos.id + '">Сменить диапазон</button>' +
+      '<button class="btn" data-act="close-pos" data-id="' + pos.id + '">Закрыть позицию</button>' +
+    '</div>';
+  }
+  h += '</div>';
+
+  // метрики
+  h += '<div class="card"><div class="row between" style="margin-bottom:10px"><h2 style="margin:0">Результат</h2><div class="row"><span class="sm muted">Бенчмарк ' + q('bench') + '</span><div class="seg">' +
+    benches.map(function (b) { return '<button class="' + (ui.bench === b[0] ? 'on' : '') + '" data-act="bench" data-v="' + b[0] + '">' + b[1] + '</button>'; }).join('') + '</div></div></div>';
+  h += '<div class="tiles">' +
+    tile('Total PnL', 'total', '<span class="' + cls(m.total) + '">' + sbenchVal(m.total, m) + '</span>', 'ROI ' + pct(m.roi, true)) +
+    tile('Total APR', 'apr', '<span class="' + cls(m.apr) + '">' + (m.apr == null ? '—' : pct(m.apr, true)) + '</span>', m.apr == null ? 'появится через сутки' : 'в пересчёте на год') +
+    tile('Fee APR', 'feeApr', m.feeApr == null ? '—' : pct(m.feeApr), m.feeApr == null ? 'появится через сутки' : 'только комиссии') +
+    tile('Стоимость позиции', 'pooled', money(m.pooledUsd), pos.closed ? 'выведено' : 'без комиссий') +
+    tile('Несобранные комиссии', 'unc', money(m.uncUsd), tokF(pos.f0, p.t0) + ' + ' + tokF(pos.f1, p.t1)) +
+    tile('Средние комиссии в день', 'daily', m.avgDailyFeesUsd == null ? '—' : money(m.avgDailyFeesUsd), 'всего ' + money(m.feesUsdAll)) +
+    tile('Возраст', 'age', ageF(m.ageH), 'в диапазоне ' + ageF(m.inH)) +
+    '</div>';
+  h += '<h3 style="margin-top:16px">Из чего сложился PnL</h3><div class="pnl-break">' +
+    '<span>Divergence loss ' + q('div') + '</span><b class="' + cls(m.div) + '">' + sbenchVal(m.div, m) + '</b>' +
+    '<span>Комиссии ' + q('fees') + '</span><b class="' + cls(m.fees) + '">' + sbenchVal(m.fees, m) + '</b>' +
+    '<span>= Pool PnL ' + q('poolPnl') + '</span><b class="' + cls(m.poolPnl) + '">' + sbenchVal(m.poolPnl, m) + '</b>' +
+    '<span>Газ ' + q('gas') + '</span><b class="neg">' + sbenchVal(-m.gas, m) + '</b>' +
+    '<span class="sum">= Total PnL</span><b class="sum ' + cls(m.total) + '">' + sbenchVal(m.total, m) + '</b>' +
+    '</div>';
+  h += '<p class="sm muted" style="margin-top:10px">Внесено: ' + money(m.depUsd) + (m.wdUsd ? ' · выведено: ' + money(m.wdUsd) : '') + ' · газ: ' + money(m.gasUsd) + ' (в долларах на момент операций).' +
+    (ui.bench === 'hold' ? ' В режиме HOLD строки выше пересчитаны по текущим ценам, поэтому газ там может отличаться.' : '') + '</p>';
+  h += '</div>';
+
+  // состав
+  if (!pos.closed) {
+    h += '<div class="card"><h2>Что сейчас внутри позиции</h2>' +
+      '<div class="comp"><i style="width:' + (sh0 * 100) + '%;background:' + M.TOKENS[p.t0].color + '"></i><i style="width:' + ((1 - sh0) * 100) + '%;background:' + M.TOKENS[p.t1].color + '"></i></div>' +
+      '<div class="row between sm"><span>' + tokF(m.x, p.t0) + ' · ' + money(v0) + ' (' + num(sh0 * 100, 0) + '%)</span><span>' + tokF(m.y, p.t1) + ' · ' + money(v1) + ' (' + num((1 - sh0) * 100, 0) + '%)</span></div>' +
+      '<p class="sm muted" style="margin-top:8px">Состав меняется сам: когда цена ' + p.t0 + ' растёт, пул продаёт его за ' + p.t1 + ', когда падает — докупает. Отсюда и divergence loss.</p></div>';
+  }
+
+  // история позиции
+  var names = { deposit: 'Внесено', withdraw: 'Выведено', collect: 'Собраны комиссии', gas: 'Газ' };
+  var rows = pos.flows.slice().reverse().map(function (f) {
+    var what = f.type === 'gas' ? money(f.usd) + ' (' + tokF(f.eth, 'ETH') + ')' : tokF(f.a0, p.t0) + ' + ' + tokF(f.a1, p.t1) + ' <span class="muted">≈ ' + money(f.a0 * f.p0 + f.a1 * f.p1) + '</span>';
+    return '<tr><td>' + dateF(f.i) + '</td><td>' + names[f.type] + '</td><td>' + what + '</td></tr>';
+  }).join('');
+  h += '<div class="card"><h2>История позиции</h2><div class="tscroll"><table class="t"><tr><th>Когда</th><th>Действие</th><th>Сумма</th></tr>' + rows + '</table></div></div>';
+  return h;
+}
+function tile(title, tipk, val, sub) {
+  return '<div class="tile"><span>' + title + ' ' + q(tipk) + '</span><b>' + val + '</b><small>' + sub + '</small></div>';
+}
+
+// ---------- новая позиция ----------
+function presetRange(p, P, preset) {
+  if (preset === 'full') return { pa: P / M.FULL, pb: P * M.FULL, full: true };
+  var r = p.presets[preset]; return { pa: P * (1 - r), pb: P * (1 + r), full: false };
+}
+function formRange(f, p, P) {
+  if (f.preset === 'custom') return { pa: parseNum(f.paStr), pb: parseNum(f.pbStr), full: false };
+  return presetRange(p, P, f.preset);
+}
+function presetButtons(p, f, act) {
+  var b = p.presets.map(function (r, k) { return '<button class="btn sm ' + (f.preset === k ? 'on' : '') + '" data-act="' + act + '" data-v="' + k + '">' + ['Узкий ', 'Средний ', 'Широкий '][k] + presetF(p, r) + '</button>'; }).join('');
+  b += '<button class="btn sm ' + (f.preset === 'full' ? 'on' : '') + '" data-act="' + act + '" data-v="full">Полный</button>';
+  b += '<button class="btn sm ' + (f.preset === 'custom' ? 'on' : '') + '" data-act="' + act + '" data-v="custom">Свой</button>';
+  return '<div class="row">' + b + '</div>';
+}
+function rangeInputs(p, P, f, prefix) {
+  var r = formRange(f, p, P), full = f.preset === 'full';
+  var va = f.preset === 'custom' ? f.paStr : full ? '0' : inputPrice(r.pa, p);
+  var vb = f.preset === 'custom' ? f.pbStr : full ? '∞' : inputPrice(r.pb, p);
+  return '<div class="inrow">' +
+    '<div><label class="f">Мин. цена (' + p.t1 + ' за 1 ' + p.t0 + ')</label><input class="inp" inputmode="decimal" data-f="' + prefix + 'pa" value="' + esc(va) + '"' + (full ? ' disabled' : '') + '></div>' +
+    '<div><label class="f">Макс. цена (' + p.t1 + ' за 1 ' + p.t0 + ')</label><input class="inp" inputmode="decimal" data-f="' + prefix + 'pb" value="' + esc(vb) + '"' + (full ? ' disabled' : '') + '></div>' +
+    '</div>';
+}
+
+function viewNew() {
+  var f = ui.form, p = M.pool(f.pool), P = M.price(st, p);
+  var h = '<h1>Новая позиция</h1><p class="muted">Три шага: выбери пул, задай диапазон цен и сумму. В настоящем сервисе шаги и названия кнопок такие же.</p>';
+  h += '<div class="card"><h2>1. Пул ' + q('fee') + '</h2><div class="pools">' + M.POOLS.map(function (pp) {
+    return '<div class="pool-opt ' + (pp.id === f.pool ? 'sel' : '') + '" data-act="fpool" data-id="' + pp.id + '"><div class="pair">' + pairBadge(pp) + '<b>' + pairF(pp) + '</b><span class="chip">' + feeF(pp) + '</span></div>' +
+      '<small>Объём за сутки ~' + shortUsd(pp.vol) + ' · ликвидность ~' + shortUsd(pp.tvl) + '</small></div>';
+  }).join('') + '</div></div>';
+
+  h += '<div class="card"><h2>2. Диапазон цен ' + q('range') + '</h2><p class="sm">Текущая цена: <b>1 ' + p.t0 + ' = ' + priceF(P, p) + ' ' + p.t1 + '</b></p>' +
+    presetButtons(p, f, 'fpreset') + rangeInputs(p, P, f, '') +
+    '<div class="chart" data-chart="mint"></div></div>';
+  charts.mint = mintChartSpec();
+
+  h += '<div class="card"><h2>3. Сумма</h2><label class="f">Сколько внести, в долларах</label>' +
+    '<div class="amt"><input class="inp" inputmode="decimal" data-f="amount" value="' + esc(f.amount) + '"><button class="btn" data-act="fmax">Макс</button></div>' +
+    '<div id="mint-preview">' + mintPreview() + '</div></div>';
+  return h;
+}
+function mintChartSpec() {
+  var f = ui.form, p = M.pool(f.pool), r = formRange(f, p, M.price(st, p));
+  return { pool: p, days: 30, pa: r.pa, pb: r.pb, full: r.full };
+}
+
+function rangeWarnings(p, r, P) {
+  var w = [];
+  if (r.full) w.push('Полный диапазон никогда не выйдет за границы, но комиссий будет в разы меньше, чем у узкого.');
+  else {
+    var width = r.pb / r.pa - 1;
+    var narrow = p.t1 === 'USDT' ? 0.0005 : 0.06;
+    if (P <= r.pa) w.push('Весь диапазон выше текущей цены — ты вносишь только ' + p.t0 + '. Комиссии начнутся, когда цена дойдёт до диапазона.');
+    else if (P >= r.pb) w.push('Весь диапазон ниже текущей цены — ты вносишь только ' + p.t1 + '. Комиссии начнутся, когда цена опустится в диапазон.');
+    if (width < narrow) w.push('Очень узкий диапазон: на бумаге высокий доход, но цена может выйти за границу за считанные часы.');
+  }
+  return w;
+}
+
+function mintPreview() {
+  var f = ui.form, p = M.pool(f.pool), P = M.price(st, p), r = formRange(f, p, P), v = parseNum(f.amount), qq;
+  try { qq = M.quoteMint(st, p.id, r.pa, r.pb, v); } catch (e) { return '<div class="alert err">' + esc(e.message) + '</div>'; }
+  var u0 = M.usd(st, p.t0), u1 = M.usd(st, p.t1), b0 = st.wallet[p.t0], b1 = st.wallet[p.t1];
+  var sh0 = Math.max(0, qq.x - b0), sh1 = Math.max(0, qq.y - b1);
+  var h = '<p style="margin-top:12px">Ты внесёшь: <b>' + tokF(qq.x, p.t0) + '</b> (' + money(qq.x * u0) + ') и <b>' + tokF(qq.y, p.t1) + '</b> (' + money(qq.y * u1) + ')</p>';
+  h += '<p class="sm muted">В кошельке: ' + tokF(b0, p.t0) + ' и ' + tokF(b1, p.t1) + '</p>';
+  if (qq.inRange) h += '<div class="alert info">Оценка: ≈ <b>' + pct(qq.feeApr) + ' годовых</b> комиссиями (≈ ' + money(qq.feeApr * v / 365) + ' в день), <b>пока цена в диапазоне</b>. Это не обещание: доход меняется вместе с объёмом торгов, а divergence loss может съесть его.</div>';
+  rangeWarnings(p, r, P).forEach(function (t) { h += '<div class="alert safe">' + t + '</div>'; });
+  if (!st.connected) return h + '<button class="btn primary block" data-act="connect">Подключить демо-кошелёк</button>';
+  if (sh0 > 1e-12 || sh1 > 1e-12) {
+    var miss = sh0 > 1e-12 ? tokF(sh0, p.t0) : tokF(sh1, p.t1);
+    h += '<div class="alert warn">Не хватает ' + miss + '. В реальном сервисе нужно сначала обменять часть второго токена. Тренажёр может сделать это за тебя одним обменом.</div>';
+    h += '<div class="row"><button class="btn" data-act="fixswap">Обменять недостающее</button><button class="btn" data-act="fmax">Внести максимум без обмена</button></div>';
+    return h;
+  }
+  var ethAfter = st.wallet.ETH - (p.t0 === 'ETH' ? qq.x : 0) - (p.t1 === 'ETH' ? qq.y : 0);
+  if (ethAfter * M.usd(st, 'ETH') < M.RESERVE_USD) h += '<div class="alert warn">После этой операции почти не останется ETH на газ. Тогда ты не сможешь собрать комиссии или вывести деньги, пока не пополнишь ETH. Оставь запас.</div>';
+  h += '<button class="btn primary block" data-act="mint">Создать позицию</button>';
+  return h;
+}
+function updMint() {
+  var el = document.getElementById('mint-preview'); if (el) el.innerHTML = mintPreview();
+  charts.mint = mintChartSpec(); drawCharts();
+}
+
+// ---------- кошелёк ----------
+function viewWallet() {
+  if (!st.connected) return '<div class="card empty"><h2>Кошелёк не подключён</h2><p class="muted">Подключение только показывает сайту твой адрес и балансы. Деньги можно потратить, лишь подписав транзакцию.</p><button class="btn primary" data-act="connect">Подключить демо-кошелёк</button></div>';
+  var rows = Object.keys(st.wallet).map(function (t) {
+    return '<tr><td><span class="tk">' + tk(t) + '</span> ' + t + '</td><td class="r">' + tokF(st.wallet[t], t) + '</td><td class="r">' + money(st.wallet[t] * M.usd(st, t)) + '</td></tr>';
+  }).join('');
+  var h = '<div class="row between"><h1>Демо-кошелёк</h1><button class="btn sm ghost" data-act="disconnect">Отключить</button></div>';
+  h += '<div class="card"><div class="tscroll"><table class="t"><tr><th>Токен</th><th class="r">Баланс</th><th class="r">≈ $</th></tr>' + rows +
+    '<tr><td><b>Итого</b></td><td></td><td class="r"><b>' + money(walletUsd()) + '</b></td></tr></table></div>' +
+    '<p class="sm muted" style="margin-top:8px">ETH нужен не только для позиций — им платится газ за каждую транзакцию.</p></div>';
+
+  var s = ui.swap, opts = function (sel) { return Object.keys(st.wallet).map(function (t) { return '<option' + (t === sel ? ' selected' : '') + '>' + t + '</option>'; }).join(''); };
+  h += '<div class="card"><h2>Обмен токенов</h2><div class="inrow">' +
+    '<div><label class="f">Отдаю</label><select class="inp" data-f="s-from">' + opts(s.from) + '</select></div>' +
+    '<div><label class="f">Получаю</label><select class="inp" data-f="s-to">' + opts(s.to) + '</select></div></div>' +
+    '<label class="f">Сколько ' + s.from + ' отдать</label><div class="amt"><input class="inp" inputmode="decimal" data-f="s-amount" value="' + esc(s.amount) + '"><button class="btn" data-act="swap-max">Макс</button></div>' +
+    '<div id="swap-preview">' + swapPreview() + '</div></div>';
+
+  var keys = Object.keys(st.approvals);
+  h += '<div class="card"><h2>Выданные разрешения ' + q('approve') + '</h2>';
+  if (!keys.length) h += '<p class="muted">Активных разрешений нет. Так и должно быть, когда ты ничего не делаешь.</p>';
+  else h += '<div class="tscroll"><table class="t"><tr><th>Токен</th><th>Кому</th><th>Лимит</th><th></th></tr>' + keys.map(function (k) {
+    var pr = k.split(':'), a = st.approvals[k];
+    return '<tr><td>' + pr[1] + '</td><td>' + M.SPENDERS[pr[0]] + '</td><td>' + (a === 'max' ? '<b class="neg">без лимита</b>' : tokF(a, pr[1])) + '</td><td class="r"><button class="btn sm" data-act="revoke" data-k="' + k + '">Отозвать</button></td></tr>';
+  }).join('') + '</table></div><p class="sm muted" style="margin-top:8px">В реальной жизни старые и безлимитные разрешения лучше отзывать: через них взломанный контракт может забрать токены.</p>';
+  h += '</div>';
+  return h;
+}
+function swapPreview() {
+  var s = ui.swap, a = parseNum(s.amount);
+  if (!(a > 0)) return '<p class="sm muted" style="margin-top:10px">Введи сумму, чтобы увидеть расчёт.</p>';
+  try {
+    var qq = M.quoteSwap(st, s.from, s.to, a);
+    return '<p style="margin-top:10px">Получишь ≈ <b>' + tokF(qq.out, s.to) + '</b></p><p class="sm muted">Комиссия пула и проскальзывание ≈ ' + money(qq.costUsd) + ' (' + pct(qq.cost) + ') + газ</p>' +
+      '<button class="btn primary block" data-act="swap-go">Обменять</button>';
+  } catch (e) { return '<div class="alert err">' + esc(e.message) + '</div>'; }
+}
+
+// ---------- история ----------
+function viewHistory() {
+  var h = '<h1>История транзакций</h1><p class="muted">Каждое действие в блокчейне — отдельная транзакция, и за каждую платится газ.</p>';
+  if (!st.txs.length) return h + '<div class="card empty"><p class="muted">Транзакций пока нет.</p></div>';
+  var gas = st.txs.reduce(function (s, t) { return s + t.gasUsd; }, 0);
+  return h + '<div class="card"><p>Всего транзакций: <b>' + st.txs.length + '</b> · потрачено на газ: <b>' + money(gas) + '</b></p><div class="tscroll"><table class="t"><tr><th>Когда</th><th>Транзакция</th><th class="r">Газ</th></tr>' +
+    st.txs.map(function (t) { return '<tr><td>' + dateF(t.i) + '</td><td>' + esc(t.label) + (t.max ? ' <span class="chip out">без лимита</span>' : '') + '</td><td class="r">' + money(t.gasUsd) + '</td></tr>'; }).join('') +
+    '</table></div></div>';
+}
+
+// ---------- как это работает ----------
+function viewLearn() {
+  return '<div class="card learn"><h1>Как это работает</h1>' +
+    '<h3>Пул ликвидности</h3><p>Ты кладёшь в пул два токена, например ETH и USDC. Трейдеры меняют один на другой через пул и платят комиссию. Часть комиссии получаешь ты — пропорционально своей доле ликвидности.</p>' +
+    '<h3>Диапазон</h3><p>Ты выбираешь, в каком диапазоне цен работают твои деньги. Пока цена внутри — начисляются комиссии. Чем уже диапазон, тем больше комиссий, но тем быстрее цена может из него выйти.</p>' +
+    '<h3>Выход за диапазон</h3><p>Если цена ушла выше диапазона, вся позиция превращается во второй токен (USDC). Если ниже — в первый (ETH), причём ты купила его по пути вниз. Комиссии в это время не начисляются. Позиция не исчезает: если цена вернётся, она снова заработает.</p>' +
+    '<h3>Divergence loss (импермантная потеря)</h3><p>Из-за того что пул всё время перекладывает токены, при любом сильном движении цены позиция стоит меньше, чем если бы токены просто лежали в кошельке. Комиссии должны это перекрывать. Сравнение с HOLD показывает, перекрывают ли.</p>' +
+    '<h3>Газ и разрешения</h3><p>Каждое действие — транзакция, за неё платится газ в ETH. Перед первым внесением токена ты даёшь контракту разрешение (approve) его использовать. Разрешай точную сумму, а старые разрешения отзывай.</p>' +
+    '<h3>Те же кнопки в настоящих сервисах</h3><div class="tscroll"><table class="t">' +
+      [['Add liquidity / New position', 'Добавить ликвидность / Новая позиция'], ['Withdraw / Remove liquidity', 'Вывести'], ['Collect fees / Claim', 'Собрать комиссии'], ['Change range', 'Сменить диапазон'],
+       ['In range / Out of range', 'В диапазоне / Вне диапазона'], ['Fee tier', 'Уровень комиссии пула'], ['Approve', 'Разрешение на токен'], ['Slippage', 'Проскальзывание'], ['Gas', 'Газ'],
+       ['Total PnL, APR, ROI, Divergence', 'Итоговый результат, годовая доходность, доходность, импермантная потеря']].map(function (r) { return '<tr><td><b>' + r[0] + '</b></td><td>' + r[1] + '</td></tr>'; }).join('') +
+    '</table></div>' +
+    '<h3>Памятка безопасности</h3><ul>' +
+      '<li><b>Seed-фразу и приватный ключ не вводи никуда и никому не показывай.</b> Ни один настоящий сайт, кошелёк или «поддержка» их не просит.</li>' +
+      '<li>Открывай сервисы только из сохранённых закладок. Фишинговые копии выглядят точь-в-точь, отличается лишь адрес.</li>' +
+      '<li>Читай, что подписываешь. Не понимаешь — не подписывай.</li>' +
+      '<li>Разрешай точную сумму, а не «без лимита». Старые разрешения отзывай.</li>' +
+      '<li>Начинай с маленькой суммы, которую не жалко потерять.</li>' +
+      '<li>Держи немного ETH на газ, иначе не сможешь вывести деньги.</li>' +
+      '<li>Если тебе пишут в личку «из поддержки» — это мошенники.</li>' +
+    '</ul></div>';
+}
+
+// ---------- модальные окна ----------
+function modalHtml() {
+  var m = ui.modal, body = '';
+  if (m.type === 'tip') { var t = TIPS[m.k]; body = mh(t[0]) + '<p>' + t[1] + '</p><button class="btn block" data-act="close-modal">Понятно</button>'; }
+  else if (m.type === 'connect') {
+    body = mh('Подключение кошелька') +
+      '<p>Подключение показывает сайту только адрес и балансы кошелька. Потратить деньги сайт сможет, лишь когда ты сама подпишешь транзакцию.</p>' +
+      '<div class="alert safe"><b>Запомни:</b> при подключении настоящий кошелёк никогда не просит seed-фразу или приватный ключ. Если сайт показывает окно «введите 12 слов» — закрой его, это мошенники.</div>' +
+      '<p class="sm muted">Здесь подключается игровой кошелёк: 10 000 демо-USDC и 2 демо-ETH.</p>' +
+      '<button class="btn primary block" data-act="connect-ok">Подключить демо-кошелёк</button>';
+  }
+  else if (m.type === 'sign') body = signHtml(m);
+  else if (m.type === 'add') { var pa = M.getPos(st, m.id), pp = M.pool(pa.pool); body = mh('Добавить ликвидность в #' + m.id) + '<p class="sm muted">Диапазон останется прежним: ' + rangeF(pa, pp) + '</p><label class="f">Сколько добавить, в долларах</label><input class="inp" inputmode="decimal" data-f="m-amount" value="' + esc(m.amount) + '"><div id="modal-preview">' + modalPreview() + '</div>'; }
+  else if (m.type === 'wd') { body = mh('Вывести часть из #' + m.id) + '<label class="f">Доля: <b id="wd-pct">' + m.pct + '%</b></label><input type="range" class="slider" min="1" max="99" value="' + m.pct + '" data-f="m-pct"><div class="row">' +
+      [10, 25, 50, 75].map(function (v) { return '<button class="btn sm" data-act="wd-set" data-v="' + v + '">' + v + '%</button>'; }).join('') + '</div><div id="modal-preview">' + modalPreview() + '</div>'; }
+  else if (m.type === 'rerange') {
+    var po = M.getPos(st, m.id), p = M.pool(po.pool), P = M.price(st, p);
+    body = mh('Сменить диапазон #' + m.id) + '<p class="sm">Текущий: ' + rangeF(po, p) + '<br>Текущая цена: <b>' + priceF(P, p) + ' ' + p.t1 + '</b></p>' +
+      '<p class="sm muted">Новый диапазон строится вокруг текущей цены:</p>' + presetButtons(p, m, 'rr-preset') + rangeInputs(p, P, m, 'm-') + '<div id="modal-preview">' + modalPreview() + '</div>';
+  }
+  else if (m.type === 'reset') body = mh('Начать заново?') + '<p>Все позиции, история и демо-кошелёк вернутся к началу. Рынок начнётся с новой случайной истории цен.</p><div class="row"><button class="btn primary" data-act="reset-ok">Да, сбросить</button><button class="btn" data-act="close-modal">Отмена</button></div>';
+  return '<div class="overlay" data-act="overlay"><div class="modal" role="dialog" aria-modal="true">' + body + '</div></div>';
+}
+function mh(t) { return '<h2>' + t + '<button class="x" data-act="close-modal" aria-label="Закрыть">✕</button></h2>'; }
+
+function signHtml(m) {
+  var g = M.planGas(st, m.plan);
+  var h = mh('Подтверждение в демо-кошельке') + '<p class="sm muted">' + esc(m.title) + '. В настоящем кошельке каждая транзакция подписывается отдельно.</p><ol class="txl">';
+  m.plan.txs.forEach(function (t, k) {
+    h += '<li><div class="h"><span>' + esc(t.label) + '</span><span class="muted">газ ' + money(g.list[k].usd) + '</span></div>';
+    if (t.detail) h += '<div class="sm muted">' + esc(t.detail) + '</div>';
+    if (t.approve) {
+      var on = !!m.max[k];
+      h += '<div class="opt"><label><input type="radio" name="ap' + k + '" data-act="apmode" data-k="' + k + '" data-v="0"' + (on ? '' : ' checked') + '> <span><b>Точная сумма</b> (' + tokF(t.approve.amt, t.approve.tok) + ') — безопаснее</span></label>' +
+        '<label><input type="radio" name="ap' + k + '" data-act="apmode" data-k="' + k + '" data-v="1"' + (on ? ' checked' : '') + '> <span><b>Без лимита</b> — удобно, но рискованно ' + q('approve') + '</span></label></div>';
+    }
+    h += '</li>';
+  });
+  h += '</ol><p>Газ за всё: <b>' + money(g.usd) + '</b> <span class="muted">(' + tokF(g.eth, 'ETH') + ')</span></p>';
+  h += '<div class="alert safe">Перед подписью в настоящем кошельке проверь: адрес сайта, что именно подписываешь и сколько разрешаешь. Если кошелёк или сайт просит seed-фразу — это мошенники.</div>';
+  if (m.err) h += '<div class="alert err">' + esc(m.err) + '</div>';
+  h += '<div class="row"><button class="btn primary" data-act="sign-ok">Подписать (демо)</button><button class="btn" data-act="close-modal">Отклонить</button></div>';
+  return h;
+}
+
+function modalPreview() {
+  var m = ui.modal;
+  try {
+    if (m.type === 'add') {
+      var pos = M.getPos(st, m.id), p = M.pool(pos.pool), v = parseNum(m.amount), plan = M.planIncrease(st, pos, v), qq = plan.quote;
+      var short = (qq.x > st.wallet[p.t0] + 1e-9) || (qq.y > st.wallet[p.t1] + 1e-9);
+      return '<p style="margin-top:12px">Внесёшь: <b>' + tokF(qq.x, p.t0) + '</b> и <b>' + tokF(qq.y, p.t1) + '</b></p><p class="sm muted">В кошельке: ' + tokF(st.wallet[p.t0], p.t0) + ' и ' + tokF(st.wallet[p.t1], p.t1) + ' · газ ≈ ' + money(M.planGas(st, plan).usd) + '</p>' +
+        (short ? '<div class="alert warn">Не хватает токенов. Обменяй во вкладке «Кошелёк» или уменьши сумму.</div>' : '<button class="btn primary block" data-act="add-go">Продолжить</button>');
+    }
+    if (m.type === 'wd') {
+      var pw = M.getPos(st, m.id), p2 = M.pool(pw.pool), plw = M.planDecrease(st, pw, m.pct / 100), a = plw.quote;
+      return '<p style="margin-top:12px">Получишь: <b>' + tokF(a.x, p2.t0) + '</b> и <b>' + tokF(a.y, p2.t1) + '</b> (≈ ' + money(a.x * M.usd(st, p2.t0) + a.y * M.usd(st, p2.t1)) + ')</p>' +
+        '<p class="sm muted">Комиссии останутся в позиции — их собирают отдельно. Газ ≈ ' + money(M.planGas(st, plw).usd) + '</p><button class="btn primary block" data-act="wd-go">Продолжить</button>';
+    }
+    if (m.type === 'rerange') {
+      var pr = M.getPos(st, m.id), p3 = M.pool(pr.pool), P = M.price(st, p3), r = formRange(m, p3, P), plr = M.planRerange(st, pr, r.pa, r.pb, r.full), qr = plr.quote;
+      var u0 = M.usd(st, p3.t0), u1 = M.usd(st, p3.t1), gas = M.planGas(st, plr);
+      var h = '<ol class="sm" style="padding-left:18px;margin:12px 0">' +
+        '<li>Из #' + pr.id + ' выйдет ' + tokF(qr.a.x, p3.t0) + ' + ' + tokF(qr.a.y, p3.t1) + ' (≈ ' + money(qr.oldUsd) + '). Комиссии ≈ ' + money(qr.f0 * u0 + qr.f1 * u1) + ' уйдут в кошелёк.</li>' +
+        (qr.s > 0 ? '<li>Обмен: ' + tokF(qr.s, qr.sellTok) + ' → ≈ ' + tokF(qr.got, qr.buyTok) + '. Потери на комиссии обмена ≈ ' + money(qr.swapLossUsd) + '.</li>' : '<li>Обмен не нужен.</li>') +
+        '<li>Новая позиция: ' + tokF(qr.x, p3.t0) + ' + ' + tokF(qr.y, p3.t1) + ' (≈ ' + money(qr.newUsd) + ').</li></ol>' +
+        '<p class="sm">Транзакций: <b>' + plr.txs.length + '</b> · газ ≈ <b>' + money(gas.usd) + '</b></p>';
+      rangeWarnings(p3, r, P).forEach(function (t) { h += '<div class="alert safe">' + t + '</div>'; });
+      h += '<div class="alert warn">Смена диапазона фиксирует текущий divergence loss: новая позиция начнёт с той суммы, что есть сейчас. Частые перестановки + газ — частая причина убытков у новичков.</div>';
+      return h + '<button class="btn primary block" data-act="rr-go">Продолжить</button>';
+    }
+  } catch (e) { return '<div class="alert err" style="margin-top:12px">' + esc(e.message) + '</div>'; }
+  return '';
+}
+function updModal() { var el = document.getElementById('modal-preview'); if (el) el.innerHTML = modalPreview(); }
+
+function openSign(plan, title, okMsg, after) { ui.modal = { type: 'sign', plan: plan, title: title, okMsg: okMsg, after: after, max: {} }; render(); }
+function needWallet() { if (st.connected) return false; ui.modal = { type: 'connect' }; render(); return true; }
+function fail(e) { toast('<b>Не получилось.</b> ' + esc(e.message), 6000); }
+
+// ---------- график ----------
+function drawCharts() {
+  var els = document.querySelectorAll('[data-chart]');
+  for (var k = 0; k < els.length; k++) {
+    var el = els[k], spec = charts[el.getAttribute('data-chart')];
+    if (spec) el.innerHTML = svgChart(spec, Math.max(260, el.clientWidth || 600));
+  }
+}
+function svgChart(spec, W) {
+  var p = spec.pool, n = M.nowI(st), from = Math.max(0, n - spec.days * 24);
+  var H = Math.round(Math.max(190, Math.min(260, W * 0.42)));
+  var stepI = Math.max(1, Math.ceil((n - from) / Math.max(80, Math.floor(W / 2.5))));
+  var pts = [];
+  for (var i = from; i <= n; i += stepI) pts.push([i, M.price(st, p, i)]);
+  if (pts[pts.length - 1][0] !== n) pts.push([n, M.price(st, p, n)]);
+  var lo = Infinity, hi = -Infinity;
+  pts.forEach(function (q2) { lo = Math.min(lo, q2[1]); hi = Math.max(hi, q2[1]); });
+  var span = Math.max(hi - lo, hi * 0.002);
+  var band = !spec.full && isFinite(spec.pa) && isFinite(spec.pb) && spec.pa > 0 && spec.pb > spec.pa;
+  if (band) {
+    if (spec.pa < lo && spec.pa > lo - 3 * span) lo = spec.pa;
+    if (spec.pb > hi && spec.pb < hi + 3 * span) hi = spec.pb;
+  }
+  var pad = (hi - lo || hi * 0.01) * 0.08; lo -= pad; hi += pad;
+  var L = 6, R = 66, T = 10, B = 24, w = W - L - R, h = H - T - B;
+  var X = function (ii) { return L + (ii - from) / Math.max(1, n - from) * w; };
+  var Y = function (v) { return T + (hi - v) / (hi - lo) * h; };
+  var ld = p.pdec > 2 ? p.pdec - 1 : (hi < 100 ? 2 : 0);
+  var s = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="График цены ' + pairF(p) + '">';
+  for (var g = 0; g <= 3; g++) { var gv = lo + (hi - lo) * g / 3, gy = Y(gv); s += '<line class="grid" x1="' + L + '" x2="' + (L + w) + '" y1="' + gy + '" y2="' + gy + '"/><text class="axis" x="' + (L + w + 6) + '" y="' + (gy + 4) + '">' + num(gv, ld) + '</text>'; }
+  if (spec.full) s += '<rect class="band" x="' + L + '" y="' + T + '" width="' + w + '" height="' + h + '"/><text class="bl" x="' + (L + 6) + '" y="' + (T + 14) + '">полный диапазон</text>';
+  else if (band) {
+    var y1 = Y(Math.min(hi, spec.pb)), y2 = Y(Math.max(lo, spec.pa));
+    if (y2 > y1) s += '<rect class="band" x="' + L + '" y="' + y1 + '" width="' + w + '" height="' + (y2 - y1) + '"/>';
+    if (spec.pb <= hi && spec.pb >= lo) s += '<line class="bound" x1="' + L + '" x2="' + (L + w) + '" y1="' + Y(spec.pb) + '" y2="' + Y(spec.pb) + '"/><text class="bl" x="' + (L + 6) + '" y="' + (Y(spec.pb) - 4) + '">макс ' + num(spec.pb, ld) + '</text>';
+    else s += '<text class="bl" x="' + (L + 6) + '" y="' + (T + 12) + '">макс ' + num(spec.pb, ld) + ' ↑ выше графика</text>';
+    if (spec.pa >= lo && spec.pa <= hi) s += '<line class="bound" x1="' + L + '" x2="' + (L + w) + '" y1="' + Y(spec.pa) + '" y2="' + Y(spec.pa) + '"/><text class="bl" x="' + (L + 6) + '" y="' + (Y(spec.pa) + 13) + '">мин ' + num(spec.pa, ld) + '</text>';
+    else s += '<text class="bl" x="' + (L + 6) + '" y="' + (T + h - 4) + '">мин ' + num(spec.pa, ld) + ' ↓ ниже графика</text>';
+  }
+  [[spec.markI, 'старт'], [spec.endI, 'закрыта']].forEach(function (mk) {
+    if (mk[0] != null && mk[0] >= from && mk[0] <= n) { var mx = X(mk[0]); s += '<line class="mark" x1="' + mx + '" x2="' + mx + '" y1="' + T + '" y2="' + (T + h) + '"/><text class="axis" x="' + (mx + 3) + '" y="' + (T + h - 4) + '">' + mk[1] + '</text>'; }
+  });
+  s += '<path class="line" d="M' + pts.map(function (q2) { return X(q2[0]).toFixed(1) + ' ' + Y(q2[1]).toFixed(1); }).join('L') + '"/>';
+  var last = pts[pts.length - 1]; s += '<circle cx="' + X(last[0]) + '" cy="' + Y(last[1]) + '" r="4" fill="var(--accent)"/>';
+  s += '<text class="axis" x="' + L + '" y="' + (H - 6) + '">' + dateF(from, true) + '</text><text class="axis" x="' + (L + w) + '" y="' + (H - 6) + '" text-anchor="end">' + dateF(n, true) + '</text>';
+  return s + '</svg>';
+}
+
+// ---------- уведомления ----------
+function toast(html, ms) {
+  var id = ++ui.tid; ui.toasts.push({ id: id, html: html }); renderToasts();
+  setTimeout(function () { ui.toasts = ui.toasts.filter(function (t) { return t.id !== id; }); renderToasts(); }, ms || 5000);
+}
+function renderToasts() {
+  document.getElementById('toasts').innerHTML = ui.toasts.map(function (t) { return '<div class="toast">' + t.html + '<button class="x" data-act="toast-x" data-id="' + t.id + '" aria-label="Закрыть">✕</button></div>'; }).join('');
+}
+
+// ---------- машина времени ----------
+var SC = {
+  crash: { h: 24, sc: { drift: Math.log(0.7) / 24, volMult: 1.5, volume: 3 }, label: 'Сценарий «Обвал −30%»: прошли сутки' },
+  pump: { h: 24, sc: { drift: Math.log(1.3) / 24, volMult: 1.3, volume: 2.5 }, label: 'Сценарий «Рост +30%»: прошли сутки' },
+  flat: { h: 168, sc: { drift: 0, volMult: 0.3, volume: 0.6 }, label: 'Сценарий «Боковик»: прошла спокойная неделя' }
+};
+var ADV_LABEL = { 1: 'Прошёл 1 час', 24: 'Прошёл 1 день', 168: 'Прошла 1 неделя', 720: 'Прошёл 1 месяц' };
+function advanceBy(h, sc, label) {
+  var e0 = M.usd(st, 'ETH'), b0 = M.usd(st, 'WBTC');
+  var r = M.advance(st, h, sc); save();
+  var e1 = M.usd(st, 'ETH'), b1 = M.usd(st, 'WBTC');
+  var lines = ['<b>' + label + '</b>', 'ETH: ' + money(e0) + ' → ' + money(e1) + ' (' + pct(e1 / e0 - 1, true) + ')', 'BTC: ' + money(b0) + ' → ' + money(b1) + ' (' + pct(b1 / b0 - 1, true) + ')'];
+  r.ids.forEach(function (id) {
+    var a = r.before[id], b = r.after[id]; if (a === b) return;
+    var pos = M.getPos(st, id), txt = b === 'out' ? 'вышла из диапазона — комиссии не начисляются' : b === 'edge' ? 'цена у границы диапазона' : 'снова в диапазоне';
+    lines.push('Позиция #' + id + ' ' + pairF(M.pool(pos.pool)) + ': ' + txt);
+  });
+  if (r.feesUsd > 0) lines.push('Начислено комиссий: +' + money(r.feesUsd));
+  toast(lines.join('<br>'), 9000);
+  render();
+}
+
+// ---------- действия ----------
+function posById(d) { return M.getPos(st, +d.id); }
+var A = {
+  tab: function (d) { ui.tab = d.tab; ui.posId = null; render(); window.scrollTo(0, 0); },
+  open: function (d) { ui.tab = 'pos'; ui.posId = +d.id; ui.modal = null; render(); window.scrollTo(0, 0); },
+  connect: function () { ui.modal = { type: 'connect' }; render(); },
+  'connect-ok': function () { st.connected = true; save(); ui.modal = null; toast('Демо-кошелёк подключён. В нём 10 000 USDC и 2 ETH.'); render(); },
+  disconnect: function () { st.connected = false; save(); render(); },
+  adv: function (d) { advanceBy(+d.h, null, ADV_LABEL[d.h] || ('Прошло ' + d.h + ' ч')); },
+  sc: function (d) { var s = SC[d.k]; advanceBy(s.h, s.sc, s.label); },
+  tip: function (d) { ui.modal = { type: 'tip', k: d.k, prev: ui.modal }; render(); },
+  'close-modal': function () { ui.modal = (ui.modal && ui.modal.type === 'tip' && ui.modal.prev) ? ui.modal.prev : null; render(); },
+  overlay: function (d, el, e) { if (e.target === el) A['close-modal'](); },
+  'toast-x': function (d) { ui.toasts = ui.toasts.filter(function (t) { return t.id !== +d.id; }); renderToasts(); },
+  'intro-hide': function () { st.introHidden = true; save(); render(); },
+  'show-closed': function () { ui.showClosed = !ui.showClosed; render(); },
+  bench: function (d) { ui.bench = d.v; render(); },
+  days: function (d) { ui.days = +d.v; render(); },
+  reset: function () { ui.modal = { type: 'reset' }; render(); },
+  'reset-ok': function () { st = fresh(); save(); ui.modal = null; ui.tab = 'positions'; ui.posId = null; toast('Демо сброшено. Начинаем с чистого листа.'); render(); },
+
+  fpool: function (d) { ui.form.pool = d.id; ui.form.preset = 1; ui.form.paStr = ''; ui.form.pbStr = ''; render(); },
+  fpreset: function (d) { setPreset(ui.form, M.pool(ui.form.pool), d.v); render(); },
+  fmax: function () {
+    var f = ui.form, p = M.pool(f.pool), r = formRange(f, p, M.price(st, p));
+    try { f.amount = String(M.maxMintValue(st, p.id, r.pa, r.pb)); } catch (e) { return fail(e); }
+    render();
+  },
+  fixswap: function () {
+    if (needWallet()) return;
+    var f = ui.form, p = M.pool(f.pool), r = formRange(f, p, M.price(st, p));
+    try {
+      var qq = M.quoteMint(st, p.id, r.pa, r.pb, parseNum(f.amount));
+      var sh0 = qq.x - st.wallet[p.t0], sh1 = qq.y - st.wallet[p.t1], from, to, missing;
+      if (sh0 > 0) { from = p.t1; to = p.t0; missing = sh0; } else { from = p.t0; to = p.t1; missing = sh1; }
+      var c = M.swapCost(from, to), sell = missing * M.usd(st, to) / (M.usd(st, from) * (1 - c)) * 1.002;
+      var spare = st.wallet[from] - (from === p.t0 ? qq.x : qq.y) - (from === 'ETH' ? M.RESERVE_USD / M.usd(st, 'ETH') : 0);
+      if (sell > spare) throw new Error('Даже с обменом не хватает: уменьши сумму или купи токены во вкладке «Кошелёк».');
+      openSign(M.planSwap(st, from, to, sell), 'Обмен ' + from + ' → ' + to + ', чтобы хватило на позицию', 'Обмен выполнен. Теперь можно создать позицию.');
+    } catch (e) { fail(e); }
+  },
+  mint: function () {
+    if (needWallet()) return;
+    var f = ui.form, p = M.pool(f.pool), r = formRange(f, p, M.price(st, p));
+    try {
+      openSign(M.planMint(st, p.id, r.pa, r.pb, parseNum(f.amount), r.full), 'Создание позиции ' + pairF(p), 'Позиция создана! Перемотай время и посмотри, как она работает.',
+        function (pos) { ui.tab = 'pos'; ui.posId = pos.id; });
+    } catch (e) { fail(e); }
+  },
+  add: function (d) { if (needWallet()) return; ui.modal = { type: 'add', id: +d.id, amount: '500' }; render(); },
+  'add-go': function () {
+    var m = ui.modal, pos = M.getPos(st, m.id);
+    try { openSign(M.planIncrease(st, pos, parseNum(m.amount)), 'Добавление ликвидности в #' + pos.id, 'Ликвидность добавлена.'); } catch (e) { m.err = e.message; fail(e); }
+  },
+  wd: function (d) { if (needWallet()) return; ui.modal = { type: 'wd', id: +d.id, pct: 50 }; render(); },
+  'wd-set': function (d) { ui.modal.pct = +d.v; render(); },
+  'wd-go': function () {
+    var m = ui.modal, pos = M.getPos(st, m.id);
+    try { openSign(M.planDecrease(st, pos, m.pct / 100), 'Вывод ' + m.pct + '% из #' + pos.id, 'Токены выведены в кошелёк.'); } catch (e) { fail(e); }
+  },
+  collect: function (d) {
+    if (needWallet()) return; var pos = posById(d);
+    try { var pl = M.planCollect(st, pos); openSign(pl, 'Сбор комиссий ≈ ' + money(pl.feesUsd) + ' из #' + pos.id, 'Комиссии в кошельке.'); } catch (e) { fail(e); }
+  },
+  rerange: function (d) { if (needWallet()) return; var m = { type: 'rerange', id: +d.id, preset: 1, paStr: '', pbStr: '' }; ui.modal = m; render(); },
+  'rr-preset': function (d) { var pos = M.getPos(st, ui.modal.id); setPreset(ui.modal, M.pool(pos.pool), d.v); render(); },
+  'rr-go': function () {
+    var m = ui.modal, pos = M.getPos(st, m.id), p = M.pool(pos.pool), r = formRange(m, p, M.price(st, p));
+    try { openSign(M.planRerange(st, pos, r.pa, r.pb, r.full), 'Смена диапазона #' + pos.id + ' (вывод, обмен и новая позиция)', 'Диапазон сменён: создана новая позиция.', function (np) { ui.tab = 'pos'; ui.posId = np.id; }); } catch (e) { fail(e); }
+  },
+  'close-pos': function (d) {
+    if (needWallet()) return; var pos = posById(d);
+    try { openSign(M.planClose(st, pos), 'Закрытие позиции #' + pos.id, 'Позиция закрыта, токены и комиссии в кошельке.'); } catch (e) { fail(e); }
+  },
+  apmode: function (d) { ui.modal.max[+d.k] = d.v === '1'; },
+  'sign-ok': function () {
+    var m = ui.modal;
+    try {
+      var res = M.executePlan(st, m.plan, { max: m.max });
+      save(); ui.modal = null;
+      if (m.after) m.after(res);
+      toast(m.okMsg || 'Готово.');
+      render();
+    } catch (e) { m.err = e.message; render(); }
+  },
+  'swap-max': function () {
+    var s = ui.swap, b = st.wallet[s.from];
+    if (s.from === 'ETH') b = Math.max(0, b - M.RESERVE_USD / M.usd(st, 'ETH'));
+    s.amount = String(Number(b.toFixed(M.TOKENS[s.from].dec))); render();
+  },
+  'swap-go': function () {
+    var s = ui.swap;
+    try { openSign(M.planSwap(st, s.from, s.to, parseNum(s.amount)), 'Обмен ' + s.from + ' → ' + s.to, 'Обмен выполнен.', function () { s.amount = ''; }); } catch (e) { fail(e); }
+  },
+  revoke: function (d) { openSign(M.planRevoke(st, d.k), 'Отзыв разрешения', 'Разрешение отозвано.'); }
+};
+
+function setPreset(f, p, v) {
+  if (v === 'custom') {
+    if (f.preset !== 'custom') {
+      var P = M.price(st, p), r = presetRange(p, P, f.preset === 'full' ? 1 : f.preset);
+      f.paStr = inputPrice(r.pa, p); f.pbStr = inputPrice(r.pb, p);
+    }
+    f.preset = 'custom';
+  } else f.preset = v === 'full' ? 'full' : +v;
+}
+
+document.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-act]'); if (!el) return;
+  var act = el.getAttribute('data-act'), fn = A[act];
+  if (!fn) return;
+  if (el.tagName === 'A') e.preventDefault();
+  if (act !== 'overlay') e.stopPropagation();
+  fn(el.dataset, el, e);
+});
+document.addEventListener('input', function (e) {
+  var t = e.target, f = t.getAttribute && t.getAttribute('data-f'); if (!f) return;
+  if (f === 'amount') { ui.form.amount = t.value; updMint(); }
+  else if (f === 'pa' || f === 'pb') {
+    var fm = ui.form, p = M.pool(fm.pool);
+    if (fm.preset !== 'custom') { setPreset(fm, p, 'custom'); markPresets('fpreset'); }
+    fm[f + 'Str'] = t.value; updMint();
+  }
+  else if (f === 'm-amount') { ui.modal.amount = t.value; updModal(); }
+  else if (f === 'm-pa' || f === 'm-pb') {
+    var m = ui.modal, pm = M.pool(M.getPos(st, m.id).pool);
+    if (m.preset !== 'custom') { setPreset(m, pm, 'custom'); markPresets('rr-preset'); }
+    m[f.slice(2) + 'Str'] = t.value; updModal();
+  }
+  else if (f === 'm-pct') { ui.modal.pct = +t.value; var l = document.getElementById('wd-pct'); if (l) l.textContent = t.value + '%'; updModal(); }
+  else if (f === 's-amount') { ui.swap.amount = t.value; var sp = document.getElementById('swap-preview'); if (sp) sp.innerHTML = swapPreview(); }
+});
+document.addEventListener('change', function (e) {
+  var t = e.target, f = t.getAttribute && t.getAttribute('data-f'); if (!f) return;
+  var s = ui.swap;
+  if (f === 's-from') { if (t.value === s.to) s.to = s.from; s.from = t.value; s.amount = ''; render(); }
+  else if (f === 's-to') { if (t.value === s.from) s.from = s.to; s.to = t.value; render(); }
+});
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ui.modal) A['close-modal'](); });
+function markPresets(act) {
+  var bs = document.querySelectorAll('[data-act="' + act + '"]');
+  for (var k = 0; k < bs.length; k++) bs[k].classList.toggle('on', bs[k].getAttribute('data-v') === 'custom');
+}
+var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(drawCharts, 120); });
+
+render();
+})();
+</script>
+</body>
+</html>
